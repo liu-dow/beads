@@ -1,14 +1,34 @@
-import { designSchema as schema } from "@/lib/design-schema";
-import { database } from "@/db/raw";
-export async function GET(){try{
-  const result=await database().prepare("SELECT data FROM designs ORDER BY updated_at DESC LIMIT 100").all<{data:string}>();
-  return Response.json({designs:result.results.map(r=>JSON.parse(r.data))},{headers:{"Cache-Control":"no-store"}});
-}catch(error){console.error("Load designs",error);return Response.json({error:"作品暂时无法加载，请稍后重试。"},{status:503});}}
-export async function POST(request:Request){try{
-  if(Number(request.headers.get("content-length")||0)>150000)return Response.json({error:"作品数据过大。"},{status:413});
-  const input=await request.json();const parsed=schema.safeParse(input);
-  if(!parsed.success)return Response.json({error:"请检查作品名称、作者和图案尺寸。"},{status:400});
-  const now=new Date().toISOString();const d={...parsed.data,id:parsed.data.id||crypto.randomUUID(),updatedAt:now};if(!parsed.data.id)d.createdAt=now;
-  await database().prepare("INSERT INTO designs (id,title,author,data,bead_count,created_at,updated_at) VALUES (?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET title=excluded.title,author=excluded.author,data=excluded.data,bead_count=excluded.bead_count,updated_at=excluded.updated_at").bind(d.id,d.title,d.author,JSON.stringify(d),d.cells.length,d.createdAt,d.updatedAt).run();
-  return Response.json({design:d});
-}catch(error){console.error("Save design",error);return Response.json({error:"保存未完成，当前修改已保留，请重试。"},{status:503});}}
+import { designSchema } from "@/lib/design-schema";
+import { authorizeApiRequest } from "@/lib/server/api-auth";
+import { designPayload, fromRecord, type DesignRecord } from "@/lib/server/design-record";
+
+export async function GET(request: Request) {
+  const auth = await authorizeApiRequest(request);
+  if (auth.response) return auth.response;
+  const { data, error } = await auth.supabase.from("designs")
+    .select("id,data,created_at,updated_at").eq("owner_id",auth.user.id).order("updated_at",{ascending:false}).limit(100);
+  if (error) return auth.json({error:"作品暂时无法加载，请稍后重试。"},503);
+  return auth.json({designs:(data as DesignRecord[]).map(fromRecord)});
+}
+
+export async function POST(request: Request) {
+  const auth = await authorizeApiRequest(request);
+  if (auth.response) return auth.response;
+  let input: unknown;
+  try {
+    const raw = await request.text();
+    if (new TextEncoder().encode(raw).byteLength > 150000) return auth.json({error:"作品数据过大。"},413);
+    input = JSON.parse(raw);
+  } catch { return auth.json({error:"作品格式无效。"},400); }
+  const parsed = designSchema.safeParse(input);
+  if (!parsed.success) return auth.json({error:"请检查作品名称、作者和图案尺寸。"},400);
+  const design = parsed.data;
+  if (design.id && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(design.id)) return auth.json({error:"作品不存在或无权访问。"},404);
+  const query = design.id
+    ? auth.supabase.from("designs").update({data:designPayload(design)}).eq("id",design.id).eq("owner_id",auth.user.id)
+    : auth.supabase.from("designs").insert({owner_id:auth.user.id,data:designPayload(design)});
+  const {data,error} = await query.select("id,data,created_at,updated_at").maybeSingle();
+  if (error) return auth.json({error:"保存未完成，当前修改已保留，请重试。"},503);
+  if (!data) return auth.json({error:"作品不存在或无权访问。"},404);
+  return auth.json({design:fromRecord(data as DesignRecord)});
+}

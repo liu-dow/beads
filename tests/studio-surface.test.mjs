@@ -4,7 +4,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createServer } from "vite";
 
-const vite=await createServer({configFile:false,appType:"custom",cacheDir:".sites-runtime/test-cache/studio",server:{middlewareMode:true,hmr:false},resolve:{alias:{"@":process.cwd()}}});
+const vite=await createServer({configFile:false,appType:"custom",cacheDir:".sites-runtime/test-cache/studio",server:{middlewareMode:true,hmr:false,ws:false,watch:null},resolve:{alias:{"@":process.cwd()}}});
 after(()=>vite.close());
 const {createDesign}=await vite.ssrLoadModule("/lib/design.ts");
 const {MaterialsEditor,MaterialList}=await vite.ssrLoadModule("/components/material-settings.tsx");

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, RotateCcw, Type, Contrast, CheckCheck, Save, LoaderCircle } from "lucide-react";
 import type { Design } from "@/lib/design";
 import { patternSignature, readMakingProgress, type MakingProgress } from "@/lib/pattern-operations";
+import { useAccount } from "@/hooks/use-account";
 import { drawPattern } from "@/lib/pattern-draw";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,33 +12,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function MakingView({design,dirty,saving,onSave}:{design:Design;dirty:boolean;saving:boolean;onSave:()=>Promise<void>}){
+  const account=useAccount();
+  const isGuest=account?.guest===true;
   const signature=useMemo(()=>patternSignature(design),[design]);
-  if(!design.id||dirty)return <div className="making-start"><ListChecksIcon/><h2>开始制作这份图案</h2><p>保存当前图案后，制作进度会随作品同步。</p><Button onClick={onSave} disabled={saving}>{saving?<LoaderCircle className="animate-spin"/>:<Save/>}{saving?"正在保存…":"保存图案并开始制作"}</Button></div>;
-  return <MakingSession key={design.id+signature} design={design} signature={signature} storageKey={`bead-atelier:making:${design.id}:${signature}`}/>;
+  if(!design.id||dirty)return <div className="making-start"><ListChecksIcon/><h2>开始制作这份图案</h2><p>{isGuest?"保存当前图案后，制作进度会保留在此浏览器。":"保存当前图案后，制作进度会随作品同步。"}</p><Button onClick={onSave} disabled={saving}>{saving?<LoaderCircle className="animate-spin"/>:<Save/>}{saving?"正在保存…":"保存图案并开始制作"}</Button></div>;
+  return <MakingSession key={design.id+signature} design={design} signature={signature} storageKey={`bead-atelier:making:${account?.user.id??"local"}:${design.id}:${signature}`} guest={isGuest}/>;
 }
 function ListChecksIcon(){return <CheckCheck size={32}/>;}
-function MakingSession({design,signature,storageKey}:{design:Design;signature:string;storageKey:string}){
+function MakingSession({design,signature,storageKey,guest}:{design:Design;signature:string;storageKey:string;guest:boolean}){
+  const account=useAccount(),request=account?.apiFetch??fetch;
   const [session,setSession]=useState(()=>{
     try{const stored=typeof window!=="undefined"?JSON.parse(localStorage.getItem(storageKey)||"null"):null;return {progress:readMakingProgress(stored,design.cols),large:stored?.large===true,mono:stored?.mono===true,direction:stored?.direction==="up"?"up":"down",storageError:false,pending:stored?.pending===true};}
     catch{return {progress:{column:0,completed:[]} as MakingProgress,large:false,mono:false,direction:"down",storageError:true,pending:false};}
   });
   const {progress,large,mono,direction,storageError}=session,[reset,setReset]=useState(false);
-  const [sync,setSync]=useState<"loading"|"saving"|"saved"|"error">("loading"),queue=useRef(Promise.resolve()),revision=useRef(0),alive=useRef(true);
-  const [loaded,setLoaded]=useState(false),[reload,setReload]=useState(0),[recovery,setRecovery]=useState<MakingProgress|null>(null);
+  const [sync,setSync]=useState<"loading"|"saving"|"saved"|"error">(guest?"saved":"loading"),queue=useRef(Promise.resolve()),revision=useRef(0),alive=useRef(true);
+  const [loaded,setLoaded]=useState(guest),[reload,setReload]=useState(0),[recovery,setRecovery]=useState<MakingProgress|null>(null);
   const persist=(progress:MakingProgress)=>{
+    if(guest){setSync("saved");setSession(s=>({...s,pending:false}));try{const cached=JSON.parse(localStorage.getItem(storageKey)||"{}");localStorage.setItem(storageKey,JSON.stringify({...cached,...progress,pending:false}));}catch{/* The earlier local write reports any storage error. */}return;}
     const version=++revision.current;setSync("saving");
     queue.current=queue.current.catch(()=>{}).then(async()=>{
-      try{const r=await fetch("/api/progress",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({designId:design.id,signature,...progress}),signal:AbortSignal.timeout(12000),keepalive:true});if(!r.ok)throw new Error("sync");if(alive.current&&version===revision.current){setSync("saved");setSession(s=>({...s,pending:false}));try{const cached=JSON.parse(localStorage.getItem(storageKey)||"{}");localStorage.setItem(storageKey,JSON.stringify({...cached,...progress,pending:false}));}catch{/* The server copy remains authoritative when local storage is unavailable. */}}}
+      try{const r=await request("/api/progress",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({designId:design.id,signature,...progress}),signal:AbortSignal.timeout(12000),keepalive:true});if(!r.ok)throw new Error("sync");if(alive.current&&version===revision.current){setSync("saved");setSession(s=>({...s,pending:false}));try{const cached=JSON.parse(localStorage.getItem(storageKey)||"{}");localStorage.setItem(storageKey,JSON.stringify({...cached,...progress,pending:false}));}catch{/* The server copy remains authoritative when local storage is unavailable. */}}}
       catch{if(alive.current&&version===revision.current)setSync("error");}
     });
   };
   useEffect(()=>{
+    if(guest)return;
     let active=true;alive.current=true;
-    fetch(`/api/progress?${new URLSearchParams({designId:design.id,signature})}`,{signal:AbortSignal.timeout(12000)})
+    request(`/api/progress?${new URLSearchParams({designId:design.id,signature})}`,{signal:AbortSignal.timeout(12000)})
       .then(async r=>{if(!r.ok)throw new Error("load");const data=await r.json() as {progress:unknown};if(!active)return;const server=readMakingProgress(data.progress,design.cols);try{const cached=JSON.parse(localStorage.getItem(storageKey)||"null");if(cached?.pending&&JSON.stringify(readMakingProgress(cached,design.cols))!==JSON.stringify(server))setRecovery(readMakingProgress(cached,design.cols));else localStorage.setItem(storageKey,JSON.stringify({...cached,...server,pending:false}));}catch{/* Progress can still be used without an offline cache. */}setSession(s=>({...s,progress:server,pending:false}));setLoaded(true);setSync("saved");})
       .catch(()=>{if(active)setSync("error");});
     return()=>{active=false;alive.current=false;};
-  },[design.id,design.cols,signature,storageKey,reload]);
+  },[design.id,design.cols,signature,storageKey,reload,request,guest]);
   const commit=(patch:Partial<typeof session>)=>{
     const next={...session,...patch,pending:patch.progress?true:patch.pending??session.pending};
     try{localStorage.setItem(storageKey,JSON.stringify({...next.progress,large:next.large,mono:next.mono,direction:next.direction,pending:next.pending}));next.storageError=false;}catch{next.storageError=true;}
@@ -67,8 +73,8 @@ function MakingSession({design,signature,storageKey}:{design:Design;signature:st
     <div className="making-color-counts">{[...counts].map(([i,n])=><span key={i}><i style={{background:mono?"white":design.palette[i].hex}}/>{design.palette[i].id} × {n}<small>{design.palette[i].sku||design.palette[i].name}</small></span>)}</div>
     <ol className="making-bead-sequence">{indices.map((index,i)=>{const p=design.palette[design.cells[index]];return <li key={index}><small>{i+1}</small><span className="making-bead" style={{background:mono?"#fff":p.hex}}><b>{p.id}</b></span><span>{p.sku||p.name}</span></li>;})}</ol>
     <div className="making-actions">{completed.length===design.cols?<p className="making-complete"><CheckCheck/>全部图纸列已完成</p>:<Button disabled={!loaded} onClick={finish}><Check/>{completed.includes(column)?"前往未完成列":"完成本列并继续"}</Button>}{completed.includes(column)&&<Button variant="outline" onClick={()=>setProgress(p=>({...p,completed:p.completed.filter(c=>c!==column)}))}>撤回本列标记</Button>}<Button variant="ghost" size="icon" aria-label="重置制作进度" disabled={!completed.length} onClick={()=>setReset(true)}><RotateCcw/></Button></div>
-    <div className="making-sync"><p className={sync==="error"||storageError?"field-warning":"microcopy"} role="status">{sync==="loading"?"正在恢复制作进度…":sync==="saving"?"正在同步制作进度…":sync==="error"?"同步未完成，请重试。":storageError?"进度已同步，此设备无法暂存离线副本。":"制作进度已同步到作品。"}</p>{sync==="error"&&<Button variant="outline" size="sm" onClick={()=>{if(loaded)persist(progress);else{setSync("loading");setReload(n=>n+1);}}}><RotateCcw/>重试同步</Button>}</div>
+    <div className="making-sync"><p className={sync==="error"||storageError?"field-warning":"microcopy"} role="status">{guest?(storageError?"此浏览器无法保存制作进度。":"制作进度已保存在当前浏览器。"):sync==="loading"?"正在恢复制作进度…":sync==="saving"?"正在同步制作进度…":sync==="error"?"同步未完成，请重试。":storageError?"进度已同步，此设备无法暂存离线副本。":"制作进度已同步到作品。"}</p>{!guest&&sync==="error"&&<Button variant="outline" size="sm" onClick={()=>{if(loaded)persist(progress);else{setSync("loading");setReload(n=>n+1);}}}><RotateCcw/>重试同步</Button>}</div>
 <AlertDialog open={recovery!==null}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>发现未同步的制作进度</AlertDialogTitle><AlertDialogDescription>此设备保留了一份与作品不同的进度。请选择要继续使用的记录。</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel onClick={()=>{commit({pending:false});setRecovery(null);}}>使用已同步进度</AlertDialogCancel><AlertDialogAction onClick={()=>{if(recovery)setProgress(recovery);setRecovery(null);}}>恢复此设备进度</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
-    <AlertDialog open={reset} onOpenChange={setReset}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>重新开始制作？</AlertDialogTitle><AlertDialogDescription>清除这份图案的全部完成标记，并同步到其他设备。</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>取消</AlertDialogCancel><AlertDialogAction onClick={()=>setProgress({column:0,completed:[]})}>重置进度</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+    <AlertDialog open={reset} onOpenChange={setReset}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>重新开始制作？</AlertDialogTitle><AlertDialogDescription>{guest?"清除当前浏览器中这份图案的全部完成标记。":"清除这份图案的全部完成标记，并同步到其他设备。"}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>取消</AlertDialogCancel><AlertDialogAction onClick={()=>setProgress({column:0,completed:[]})}>重置进度</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
   </section>;
 }

@@ -3,7 +3,7 @@ import test, { after } from "node:test";
 import { createServer } from "vite";
 import { readFile } from "node:fs/promises";
 
-const vite=await createServer({configFile:false,appType:"custom",cacheDir:".sites-runtime/test-cache/pattern",server:{middlewareMode:true,hmr:false},resolve:{alias:{"@":process.cwd()}}});
+const vite=await createServer({configFile:false,appType:"custom",cacheDir:".sites-runtime/test-cache/pattern",server:{middlewareMode:true,hmr:false,ws:false,watch:null},resolve:{alias:{"@":process.cwd()}}});
 after(()=>vite.close());
 const {createDesign,resizeDesign,materialCounts,fitColumns,DEFAULT_FIT,nextColorId,removeColor}=await vite.ssrLoadModule("/lib/design.ts");
 const {selectBetween,copySelection,clampSelection,pasteSelection,moveSelection,mirrorSelection,repeatSelection,readMakingProgress,patternSignature}=await vite.ssrLoadModule("/lib/pattern-operations.ts");

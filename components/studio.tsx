@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { Gem, Grid2X2, Box, Columns2, Pencil, Undo2, Redo2, Download, Save, Plus, Check, ChevronRight, Maximize2, RotateCcw, Rotate3D, ZoomIn, ZoomOut, SlidersHorizontal, Sun, Moon, Camera, FileText, X, ArrowUpRight, Layers, CircleHelp, UserRound, BarChart3, LoaderCircle, FolderOpen, Image as ImageIcon, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +25,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { MaterialsEditor, SizeSettings, MaterialList } from "./material-settings";
 import MakingView from "./making-view";
 import StudioTools from "./studio-tools";
+import { useAccount } from "@/hooks/use-account";
+import { guestStats, loadGuestDesigns, recordGuestExport, saveGuestDesign } from "@/lib/guest-storage";
 import { clampSelection, copySelection, mirrorSelection, moveSelection, pasteSelection, repeatSelection, type Selection, type PatternClip } from "@/lib/pattern-operations";
 
 type Stats={designs:{count:number;beads:number};exports:{format:string;count:number}[];authors:{name:string;count:number;beads:number}[]};
@@ -36,7 +39,10 @@ function PatternThumb({design}:{design:Design}){
  return <canvas ref={ref} className="collection-thumb" aria-label={design.title+"图案"}/>;
 }
 export default function Studio(){
- const [design,setDesignState]=useState<Design>(()=>createDesign());
+ const account=useAccount(),request=account?.apiFetch??fetch;
+ const isGuest=account?.guest===true;
+ const [accountOpen,setAccountOpen]=useState(false),[signingOut,setSigningOut]=useState(false);
+ const [design,setDesignState]=useState<Design>(()=>{const next=createDesign();if(account?.user.displayName)next.author=account.user.displayName;return next;});
  const current=useRef(design);
  const setDesign=useCallback((value:Design|((d:Design)=>Design))=>{const next=typeof value==="function"?value(current.current):value;current.current=next;setDesignState(next);},[]);
  const [section,setSection]=useState("studio"),[mode,setMode]=useState("3d");
@@ -61,9 +67,9 @@ export default function Studio(){
  const redo=()=>{const next=redoStack.current.pop();if(!next)return;undoStack.current.push(current.current);setDesign({...next,id:current.current.id,createdAt:current.current.createdAt});setCanUndo(true);setCanRedo(!!redoStack.current.length);setDirty(true);};
  const refresh=useCallback(async()=>{
    setLoading(true);setLoadError("");
-   try{const [a,b]=await Promise.all([fetch("/api/designs"),fetch("/api/stats")]);if(!a.ok||!b.ok)throw new Error("作品暂时无法加载，请重试。");const [da,db]=await Promise.all([a.json() as Promise<{designs:Design[]}>,b.json() as Promise<Stats>]);setSaved(da.designs);setStats(db);}
+   try{if(isGuest){const designs=loadGuestDesigns();setSaved(designs);setStats(guestStats(designs));return;}const [a,b]=await Promise.all([request("/api/designs"),request("/api/stats")]);if(!a.ok||!b.ok)throw new Error("作品暂时无法加载，请重试。");const [da,db]=await Promise.all([a.json() as Promise<{designs:Design[]}>,b.json() as Promise<Stats>]);setSaved(da.designs);setStats(db);}
    catch(e){setLoadError(e instanceof Error?e.message:"无法加载作品");}finally{setLoading(false);}
- },[]);
+ },[isGuest,request]);
  useEffect(()=>{const f=(e:BeforeUnloadEvent)=>{if(dirty){e.preventDefault();e.returnValue="";}};window.addEventListener("beforeunload",f);return()=>window.removeEventListener("beforeunload",f);},[dirty]);
 
  const structure=`${design.rows}:${design.cols}:${design.palette.map(p=>p.id).join("|")}`;
@@ -71,7 +77,7 @@ export default function Studio(){
  if(lastStructure!==structure){setLastStructure(structure);setSelected(i=>Math.min(i,design.palette.length-1));setSelection(null);setClipboard(null);setActiveCell(-1);}
  const save=async()=>{
    if(saving)return;setSaving(true);const original=current.current;
-   try{const r=await fetch("/api/designs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(original)});const data=await r.json() as {design:Design;error?:string};if(!r.ok)throw new Error(data.error);if(current.current===original){setDesign(data.design);setDirty(false);}else setDesign(d=>({...d,id:data.design.id}));toast.success("作品已保存到作品集");}
+   try{let savedDesign:Design;if(isGuest)savedDesign=saveGuestDesign(original);else{const r=await request("/api/designs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(original)});const data=await r.json() as {design:Design;error?:string};if(!r.ok)throw new Error(data.error);savedDesign=data.design;}if(current.current===original){setDesign(savedDesign);setDirty(false);}else setDesign(d=>({...d,id:savedDesign.id}));toast.success(isGuest?"作品已保存到当前浏览器":"作品已保存到作品集");}
    catch(e){toast.error(e instanceof Error?e.message:"保存未完成，请重试。");}finally{setSaving(false);}
  };
  const load=(d:Design)=>{setDesign(d);setDirty(false);undoStack.current=[];redoStack.current=[];setCanUndo(false);setCanRedo(false);setSelection(null);setClipboard(null);setSelected(0);setActiveCell(-1);setTool("brush");setSection("studio");setPending(null);};
@@ -97,8 +103,8 @@ export default function Studio(){
      if(exportType==="png"&&imageView==="2d"){preview=drawPattern(document.createElement("canvas"),design,{cell:24,symbols:false,rulers:false,flat:false}).toDataURL("image/png");}
      else{if(ready&&scene.current)preview=scene.current.capture(2400,exportType==="png"&&transparent);else if(exportType==="png")throw new Error("3D 预览暂不可用，请选择 2D 图案导出。");}
      if(exportType==="png")downloadImage(preview!,design.title);else await exportPdf(design,preview,true,{monochrome:pdfMono});
-     const r=await fetch("/api/stats",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:crypto.randomUUID(),designId:design.id,format:exportType})}).catch(()=>null);
-     if(!r?.ok)toast.info("文件已生成；导出统计暂时未更新。");else toast.success(exportType==="png"?"预览图片已生成":"PDF 制作图纸已生成");
+     if(isGuest){recordGuestExport(exportType as "png"|"pdf");toast.success(exportType==="png"?"预览图片已生成":"PDF 制作图纸已生成");}
+     else{const r=await request("/api/stats",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:crypto.randomUUID(),designId:design.id,format:exportType})}).catch(()=>null);if(!r?.ok)toast.info("文件已生成；导出统计暂时未更新。");else toast.success(exportType==="png"?"预览图片已生成":"PDF 制作图纸已生成");}
      setExportOpen(false);
    }catch(e){toast.error(e instanceof Error?e.message:"导出失败，请重试。");}finally{setExporting(false);}
  };
@@ -109,9 +115,9 @@ export default function Studio(){
  const editorTools={design,selected:selectedIndex,onSelect:setSelected,tool,onTool:setEditorTool,selection,canPaste:!!clipboard,onCopy:copy,onPaste:startPaste,onMirror:mirrorSelected,onRepeat:repeatSelected,onClear:clearSelection,highlight,onHighlight:()=>setHighlight(v=>!v),canUndo,canRedo,onUndo:undo,onRedo:redo};
  return <TooltipProvider delayDuration={250}><div className={"atelier "+(immersive?"immersive":"")}>
    <header className="app-header">
-     <button className="brand" onClick={()=>setSection("studio")} aria-label="返回设计工作台"><span className="brand-mark"><Gem size={25} strokeWidth={1.25}/></span><span><b>珠序<span className="brand-dot">.</span></b><small>BEAD ATELIER</small></span></button>
-     <Tabs value={section} onValueChange={v=>{setSection(v);if(v!=="studio")void refresh();}} className="navigation-tabs"><TabsList variant="line"><TabsTrigger value="studio"><Grid2X2/>设计工作台</TabsTrigger><TabsTrigger value="collection"><Layers/>我的作品</TabsTrigger><TabsTrigger value="stats"><BarChart3/>作者统计</TabsTrigger></TabsList></Tabs>
-     <div className="header-end"><span className="studio-tag">THE MAKER&apos;S STUDIO</span><IconButton label="使用指南" onClick={()=>setHelp(true)}><CircleHelp/></IconButton><button className="avatar" aria-label="编辑作者信息" onClick={openMeta}><UserRound size={19}/></button></div>
+     <Link href="/" className="brand" onClick={e=>{if(dirty||saving){e.preventDefault();toast.info("请先保存当前作品，再返回首页。");}}} aria-label="返回珠序首页"><span className="brand-mark"><Gem size={25} strokeWidth={1.25}/></span><span><b>珠序<span className="brand-dot">.</span></b><small>BEAD ATELIER</small></span></Link>
+     <Tabs value={section} onValueChange={v=>{setSection(v);if(v!=="studio")void refresh();}} className="navigation-tabs"><TabsList variant="line"><TabsTrigger value="studio"><Grid2X2/>设计工作台</TabsTrigger><TabsTrigger value="collection"><Layers/>我的作品</TabsTrigger><TabsTrigger value="stats"><BarChart3/>创作统计</TabsTrigger></TabsList></Tabs>
+     <div className="header-end"><span className="studio-tag">{isGuest?"游客模式 · 仅本机保存":"THE MAKER'S STUDIO"}</span><IconButton label="使用指南" onClick={()=>setHelp(true)}><CircleHelp/></IconButton><button className="avatar" aria-label={isGuest?"游客模式":"账户信息"} onClick={()=>setAccountOpen(true)}><UserRound size={19}/></button></div>
    </header>
    <main>
    <div style={{display:section==="studio"?"block":"none"}}>
@@ -172,10 +178,10 @@ export default function Studio(){
      {loading?<div className="empty-state"><LoaderCircle className="animate-spin"/><p>正在加载你的作品…</p></div>:loadError?<div className="empty-state"><FolderOpen/><p>{loadError}</p><Button variant="outline" onClick={refresh}>重新加载</Button></div>:saved.length===0?<div className="empty-state"><Layers size={38}/><h2>你的第一件作品，正在成形。</h2><p>在工作台点击「保存作品」，就能在这里继续欣赏和编辑。</p><Button onClick={()=>setSection("studio")}>回到工作台 <ArrowUpRight/></Button></div>:<div className="collection-grid">{saved.map(d=><article key={d.id}><button className="collection-art" onClick={()=>requestLoad(d)}><PatternThumb design={d}/><span>继续设计 <ArrowUpRight size={16}/></span></button><div className="collection-info"><h2>{d.title}</h2><span>{d.author}</span><div><span>{d.cells.length.toLocaleString()} 颗 · {materialCounts(d).length} 色</span><small>{new Date(d.updatedAt).toLocaleDateString("zh-CN")}</small></div><Button variant="outline" onClick={()=>requestLoad({...d,id:"",title:d.title+" · 副本"})}><Copy size={14}/>复制为新作品</Button></div></article>)}</div>}
    </section>}
    {section==="stats"&&<section className="statistics-page">
-     <div className="section-page-heading"><div><span className="eyebrow">THE STORY OF YOUR MAKING</span><h1>每一颗，都是积累。</h1><p>作品与导出统计，记录在这间工作室发生的创作。</p></div><Button variant="outline" onClick={refresh}><RotateCcw/>刷新统计</Button></div>
+     <div className="section-page-heading"><div><span className="eyebrow">THE STORY OF YOUR MAKING</span><h1>每一颗，都是积累。</h1><p>{isGuest?"统计来自当前浏览器中保存的游客作品。":"作品与导出统计，记录你的创作积累。"}</p></div><Button variant="outline" onClick={refresh}><RotateCcw/>刷新统计</Button></div>
      {loading?<div className="empty-state"><LoaderCircle className="animate-spin"/><p>正在整理创作记录…</p></div>:loadError?<div className="empty-state"><p>{loadError}</p><Button onClick={refresh}>重新加载</Button></div>:<>
        <div className="stats-grid">{[{n:stats?.designs.count??0,l:"已保存作品",s:"件",i:<Layers/>},{n:stats?.designs.beads??0,l:"作品中的米珠",s:"颗",i:<Gem/>},{n:stats?.exports.find(e=>e.format==="png")?.count??0,l:"图片导出",s:"次",i:<ImageIcon/>},{n:stats?.exports.find(e=>e.format==="pdf")?.count??0,l:"PDF 图纸导出",s:"次",i:<FileText/>}].map((m,i)=><div key={m.l} className={i===0?"featured-stat":""}>{m.i}<span>{m.l}</span><b>{m.n.toLocaleString()}<small>{m.s}</small></b></div>)}</div>
-       <div className="author-table"><h2>作者的创作足迹</h2><p>按作品中填写的作者姓名汇总。</p><Table><TableHeader><TableRow><TableHead>作者</TableHead><TableHead>保存作品</TableHead><TableHead>累计用珠</TableHead></TableRow></TableHeader><TableBody>{authors.map(a=><TableRow key={a.name}><TableCell><span className="author-name"><UserRound size={17}/>{a.name}</span></TableCell><TableCell>{a.count} 件</TableCell><TableCell>{a.beads.toLocaleString()} 颗</TableCell></TableRow>)}{authors.length===0&&<TableRow><TableCell colSpan={3} className="table-empty">保存第一件作品后，这里就会开始记录你的创作。</TableCell></TableRow>}</TableBody></Table></div>
+       <div className="author-table"><h2>作者的创作足迹</h2><p>{isGuest?"仅统计当前浏览器中的游客作品。":"仅统计你的作品，按作品填写的作者姓名汇总。"}</p><Table><TableHeader><TableRow><TableHead>作者</TableHead><TableHead>保存作品</TableHead><TableHead>累计用珠</TableHead></TableRow></TableHeader><TableBody>{authors.map(a=><TableRow key={a.name}><TableCell><span className="author-name"><UserRound size={17}/>{a.name}</span></TableCell><TableCell>{a.count} 件</TableCell><TableCell>{a.beads.toLocaleString()} 颗</TableCell></TableRow>)}{authors.length===0&&<TableRow><TableCell colSpan={3} className="table-empty">保存第一件作品后，这里就会开始记录你的创作。</TableCell></TableRow>}</TableBody></Table></div>
      </>}
    </section>}
    </main>
@@ -187,6 +193,7 @@ export default function Studio(){
      {exportType==="png"?<div className="export-options"><div className="field-row"><Label>导出视图</Label><Select value={imageView} onValueChange={setImageView}><SelectTrigger aria-label="导出视图"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="3d">当前 3D 视角</SelectItem><SelectItem value="2d">完整 2D 图案</SelectItem></SelectContent></Select></div>{imageView==="3d"&&<div className="switch-row"><Label htmlFor="transparent">透明背景</Label><Switch id="transparent" checked={transparent} onCheckedChange={setTransparent}/></div>}<div className="export-spec"><Camera/><div><b>{imageView==="3d"?"2400 × 1800 px":"完整图案 · 高清 PNG"}</b><p>{imageView==="3d"?"保留当前视角、珠子材质和灯光。":"导出完整编织图案，不含编辑器界面。"}</p></div></div></div>:<div className="export-options"><div className="pdf-contents"><div><Check/>作品封面、作者与成品预览</div><div><Check/>分段编号图纸与逐珠色号</div><div><Check/>材料清单、库存与需购数量</div></div><div className="switch-row"><Label htmlFor="pdf-mono">黑白符号图纸</Label><Switch id="pdf-mono" checked={pdfMono} onCheckedChange={setPdfMono}/></div><p className="microcopy">A4 横向 · 共 {Math.ceil(design.cols/32)+1+Math.ceil(counts.length/10)} 页 · 中文图纸</p></div>}
      <Button className="export-confirm" onClick={exportDesign} disabled={exporting}>{exporting?<LoaderCircle className="animate-spin"/>:<Download/>}{exporting?"正在准备你的作品…":exportType==="png"?"下载 PNG 图片":"下载 PDF 图纸"}</Button>
    </DialogContent></Dialog>
+   <Dialog open={accountOpen} onOpenChange={setAccountOpen}><DialogContent><DialogHeader><DialogTitle>{isGuest?"游客模式":"我的账户"}</DialogTitle><DialogDescription>{isGuest?"无需登录即可创作，数据仅保存在当前浏览器。":"作品和制作进度仅自己可见。"}</DialogDescription></DialogHeader><div className="account-profile"><strong>{account?.user.displayName}</strong>{!isGuest&&<p>{account?.user.email}</p>}<p>{isGuest?"清理浏览器数据会删除游客作品；登录账户后可跨设备同步。":"作品署名可以单独修改，不影响账户归属。"}</p>{dirty&&<p>当前有未保存修改。请先保存作品，再离开。</p>}<Button variant="outline" onClick={()=>{setAccountOpen(false);openMeta();}}>编辑当前作品署名</Button><Button disabled={dirty||saving||signingOut} onClick={async()=>{setSigningOut(true);try{await account?.signOut();}catch(e){toast.error(e instanceof Error?e.message:"操作未完成，请重试。");}finally{setSigningOut(false);}}}>{signingOut?"正在处理…":isGuest?"返回登录":"退出登录"}</Button></div></DialogContent></Dialog>
    <Dialog open={details} onOpenChange={setDetails}><DialogContent><DialogHeader><DialogTitle>作品信息</DialogTitle><DialogDescription>作者姓名和作品介绍会出现在导出的 PDF 中。</DialogDescription></DialogHeader><div className="metadata-form"><Label htmlFor="design-title">作品名称</Label><Input id="design-title" maxLength={100} value={meta.title} onChange={e=>setMeta(m=>({...m,title:e.target.value}))}/><Label htmlFor="design-author">作者</Label><Input id="design-author" maxLength={80} value={meta.author} onChange={e=>setMeta(m=>({...m,author:e.target.value}))}/><Label htmlFor="design-description">作品介绍</Label><textarea id="design-description" maxLength={1000} rows={3} value={meta.description} onChange={e=>setMeta(m=>({...m,description:e.target.value}))}/><Button disabled={!meta.title.trim()||!meta.author.trim()} onClick={()=>{change(d=>({...d,title:meta.title.trim(),author:meta.author.trim(),description:meta.description}));setDetails(false);}}>应用作品信息</Button></div></DialogContent></Dialog>
    <Dialog open={!!pending} onOpenChange={v=>{if(!v)setPending(null);}}><DialogContent><DialogHeader><DialogTitle>切换作品前，保留这份灵感？</DialogTitle><DialogDescription>当前作品有未保存修改。你可以返回工作台保存，或直接打开下一份作品。</DialogDescription></DialogHeader><div className="dialog-actions"><Button variant="outline" onClick={()=>setPending(null)}>返回保存</Button><Button onClick={()=>{if(pending)load(pending);}}>打开下一份作品</Button></div></DialogContent></Dialog>
    <Dialog open={help} onOpenChange={setHelp}><DialogContent><DialogHeader><DialogTitle>从第一颗珠子开始</DialogTitle><DialogDescription>让平面的灵感，成为立体的作品。</DialogDescription></DialogHeader><ol className="help-list"><li><b>选择图案与配色</b><p>新建空白图纸，或继续编辑「我的作品」中保存的设计。</p></li><li><b>逐珠编辑</b><p>在 2D 图纸拖动上色。画笔、填色、吸色和同色替换帮助你完成图案。Ctrl / ⌘ + Z 撤销。</p></li><li><b>欣赏真实材质</b><p>拖动旋转，滚轮缩放。切换珠子质感、灯光、成环或展开视角；切换至「上色」即可选珠修改。</p></li><li><b>展示与制作</b><p>填写作者信息、保存作品，导出高清 PNG 或带编号图纸和材料清单的 PDF。</p></li></ol></DialogContent></Dialog>

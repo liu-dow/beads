@@ -1,93 +1,62 @@
-# vinext-starter
+# 珠序 · Bead Atelier
 
-A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
+珠序是面向真实客户的珠饰设计工作台。用户可以先以游客身份在当前浏览器创作，也可以使用邮箱账户登录并跨设备同步；Google 登录入口会在 OAuth 配置完成后启用。账户作品、制作进度和导出统计保存在 Supabase Postgres 中，并通过行级安全策略按账户隔离。
 
-## Prerequisites
+## 本地运行
 
-- Node.js `>=22.13.0`
-- Linux with `flock`, `curl`, and GNU `timeout`
+要求 Node.js `>=22.13.0`。
 
-## Sites Lifecycle
+1. 复制 `.env.example` 为 `.dev.vars`。
+2. 填写 Supabase 项目 URL 和 publishable key。不要使用 secret 或 service-role key。
+3. 运行 `npm run dev`。
 
-The Sites lifecycle CLI runs the locked dependency install before returning this checkout. Edit the source under `app/`, then checkpoint when a coherent milestone is ready to inspect or share. The remote Sites builder runs `npm run build` against the pushed commit. Do not repeat install or build as a normal pre-checkpoint step.
+本地页面：
 
-This starter does not use `wrangler.jsonc`.
+- 游客及账户工作台：`http://localhost:5173/studio`
+- 登录与注册：`http://localhost:5173/login`
+- 品牌首页：`http://localhost:5173/`
 
-`install:ci` is intentionally a single, non-retrying `npm ci`. It refuses a concurrent install for the same project, consumes a matching image-seeded npm cache with `--prefer-offline` while retaining registry fallback for a missing cache object, otherwise downloads and verifies the complete vinext tarball recorded in `package-lock.json`, limits npm to one socket, and terminates a stalled install. `build` applies a short timeout. These helpers target Linux and use GNU `timeout`; they are not native macOS scripts.
-
-Scripts that need writable project-scoped home, npm, XDG, and temporary paths use `scripts/sites-env.sh`. The `dev` and `start` scripts honor the caller's runtime environment and keep Wrangler logs inside the checkout. The generated `.sites-runtime/` directory is disposable and ignored by Git.
-
-## Included Shape
-
-- edit site code under `app/`
-- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from `oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive `oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty `name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by `oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```dotenv
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+APP_ORIGIN=http://localhost:5173
+GOOGLE_AUTH_ENABLED=false
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+本地环境可以省略 `APP_ORIGIN`，应用会使用当前 localhost 来源。生产环境必须设置为网站的规范来源。
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs optional or required ChatGPT sign-in:
+## 账户配置
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send anonymous visitors through Sign in with ChatGPT.
-- In a Server Component, start sign-in with `<a href={chatGPTSignInPath(returnTo)} target="_top">`. The auth helper module is server-only; do not import it into a Client Component.
-- Do not use `fetch`, XHR, a client-side router, or a framework link that can prefetch the sign-in route. SIWC must start as a top-level navigation.
-- Never request the AuthAPI authorization endpoint directly. The dispatch-owned `/signin-with-chatgpt` route must start the SIWC flow.
-- Use `chatGPTSignOutPath(returnTo)` for browser sign-out links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because they depend on per-request identity headers.
+游客作品和制作进度保存在浏览器 `localStorage` 中，不会写入客户数据库；清除浏览器数据会删除这些本地记录。
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the OAuth cookies, and identity header injection. Do not implement app routes for those reserved paths. Routes that do not import and call the helper remain anonymous-compatible.
+邮箱注册、登录、邮箱验证、忘记密码和重置密码由 Supabase Auth 提供。面向客户发送邮件前，需要在 Supabase Dashboard 配置自有 SMTP，并将下列地址加入 Auth URL allow list：
 
-SIWC establishes identity only; it does not prove workspace membership. Use the Sites hosting platform's access policy controls for workspace-wide restrictions, or enforce explicit server-side membership or allowlist checks.
+- `https://your-domain.example/auth/callback`
+- 本地开发使用的 `http://localhost:5173/auth/callback`
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write actions tied to the current ChatGPT user. Leave public content anonymous.
+启用 Google 登录时，在 Google Cloud 创建 Web OAuth 客户端，将 Supabase 提供的 callback URL 填入 Google 的 authorized redirect URI，再把客户端 ID 和密钥配置到 Supabase Auth。完成后设置 `GOOGLE_AUTH_ENABLED=true`，页面才会显示 Google 登录按钮。
 
-## Diagnostic Commands
+## 数据库与权限
 
-- `npm run install:ci`: perform the one bounded lockfile install
-- `npm run dev`: start the Vite/Vinext development server
-- `npm run build`: build the deployable Sites artifact
-- `npm run start`: start the built Vinext application
-- `npm test`: build and verify the rendered development-preview metadata
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+数据库迁移位于 `supabase/migrations/`。迁移创建 `designs`、`making_progress` 和 `exports`，所有客户表都启用 RLS。应用只使用 publishable key，并通过服务端路由验证当前用户；浏览器不能提交或改写 `owner_id`。
 
-Use build commands for targeted diagnosis after a remote failure, not as part of the normal checkpoint path.
+创建迁移：
 
-The timeout defaults can be overridden for a controlled canary with `SITES_INSTALL_TIMEOUT`, `SITES_INSTALL_KILL_AFTER`, `SITES_BUILD_TIMEOUT`, and `SITES_BUILD_KILL_AFTER`. A timeout fails the command; the helpers never retry an unchanged install or build.
+```sh
+npm run db:migration:new -- migration_name
+```
 
-## Learn More
+数据库隔离测试使用 PGlite 执行实际迁移：
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+```sh
+npm run db:test
+```
+
+## 验证与构建
+
+```sh
+npm run lint
+npm test
+```
+
+`npm test` 会先生成 Cloudflare Sites 构建产物，再运行账户 API、数据库 RLS、设计操作和界面组件测试。部署环境需要设置与 `.env.example` 相同的四个运行时变量。

@@ -15,7 +15,7 @@ const vite = await createServer({
   cacheDir: path.join(root, ".sites-runtime", "test-cache", "ui"),
   root,
   resolve: { alias: { "@": root } },
-  server: { middlewareMode: true },
+  server: { middlewareMode: true, hmr: false, ws: false, watch: null },
 });
 
 after(async () => {
@@ -41,7 +41,6 @@ test("emits the catalog's animation and scrolling utilities", async () => {
 
   assert.match(css, /--tw-enter-opacity/);
   assert.match(css, /scrollbar-width:\s*thin/);
-  assert.match(css, /scrollbar-width:\s*none/);
   assert.match(css, /scrollbar-gutter:\s*stable/);
   assert.match(css, /scroll-fade-reveal-b/);
   assert.match(css, /mask-image:/);

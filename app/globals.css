@@ -18,6 +18,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:#f7f9f6;color:#253e34;font-family:var(--font-sans);font-size:16px;-webkit-font-smoothing:antialiased}
+.home-page{--home-paper:#f6f5f1;--home-ink:#193d37;--home-muted:#596d65;--home-line:#d4dbd2;--home-accent:#bc643e;--home-serif:"Songti SC","STSong","Noto Serif CJK SC","PMingLiU",serif;--home-display:"Bodoni 72","Didot","Times New Roman",serif}
 button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 button{cursor:pointer}button:disabled{cursor:not-allowed}button,input,textarea{font:inherit}
 a{color:inherit}
@@ -552,3 +553,18 @@ body:has(.bead-library-dialog) [data-slot=alert-dialog-overlay]{z-index:90}.cata
   .making-actions{bottom:0}.making-actions>button{font-size:13px}.making-step-heading{gap:18px}.making-overview{min-height:55px;display:flex;align-items:center}
   .immersive{padding-bottom:0}.immersive main{padding:0 0 74px}.immersive .split-panels{height:calc(100dvh - 250px)!important;min-height:220px;max-height:none}.immersive .mode-split .split-panels{height:calc(100dvh - 250px)!important;min-height:320px}
 }
+
+/* Customer account forms */
+.account-screen{min-height:100dvh;display:grid;place-items:center;background:var(--background);padding:32px 16px}
+.account-card{width:100%;max-width:440px;padding:32px;background:white;border:1px solid #dce4de;border-radius:12px;box-shadow:0 12px 48px #183b3210}
+.account-brand{display:flex;align-items:center;justify-content:center;gap:10px;color:#245847;text-decoration:none;font-size:25px;font-weight:600;margin-bottom:28px}
+.account-brand small{display:block;font-size:10px;letter-spacing:2px;font-weight:400;margin-top:2px}
+.account-card h1{font-size:26px;line-height:1.3;letter-spacing:0;margin:0 0 12px;color:#173c35}
+.account-intro{font-size:15px;line-height:1.7;color:#64756b;margin:0 0 24px}.account-tabs{width:100%;margin-bottom:20px}.account-tabs [data-slot=tabs-trigger]{flex:1}
+.account-google,.account-submit,.account-guest{width:100%;min-height:44px;font-size:15px}.account-google{margin-bottom:4px}.account-divider{display:flex;align-items:center;gap:12px;color:#77857d;font-size:13px;margin:20px 0}.account-divider:before,.account-divider:after{content:"";height:1px;flex:1;background:#e0e6e2}
+.account-field{display:flex;flex-direction:column;gap:8px;margin:16px 0}.account-field label{font-size:14px}.account-field input{height:44px;font-size:16px}.account-field small{font-size:13px;color:#64756b}
+.account-error{color:#a33728;font-size:14px;line-height:1.6}.account-success{color:#245847;background:#eff6f0;padding:12px;font-size:14px;line-height:1.7;display:flex;align-items:flex-start;gap:8px}.account-success svg{flex-shrink:0;margin-top:3px}
+.account-links{display:flex;justify-content:space-between;margin-top:12px}.account-links button{font-size:13px;padding:8px}.account-private{font-size:13px;color:#64756b;text-align:center;margin:24px 0 0}.account-back{display:block;margin-top:18px;font-size:14px;color:#245847}.account-loading{text-align:center}.account-loading svg{margin:auto}
+.account-guest-note{font-size:12px;line-height:1.6;color:#77857d;text-align:center;margin:10px 8px 0}
+.account-profile{display:flex;flex-direction:column;gap:14px;overflow-wrap:anywhere}.account-profile p{font-size:14px;line-height:1.7;color:#64756b;margin:0}.account-profile strong{font-size:18px;color:#173c35}
+@media(max-width:480px){.account-card{padding:24px}.account-screen{padding:20px 12px}}
