@@ -30,7 +30,6 @@ export default function Home() {
         <nav className={styles.nav} aria-label="首頁導覽">
           <a className={styles.aboutLink} href="#craft">The process</a>
           <LanguageSwitcher />
-          <Link href="/login">Sign in</Link>
           <Button asChild className={styles.navCta}>
             <Link href="/studio">Open studio <ArrowUpRight aria-hidden="true" /></Link>
           </Button>
@@ -111,7 +110,7 @@ export default function Home() {
       <footer className={styles.footer}>
         <Link href="/" className={styles.footerBrand}>珠序<span>BEAD ATELIER</span></Link>
         <p>Made for the hands that create.</p>
-        <nav className={styles.footerLinks} aria-label="頁尾導覽"><Link href="/studio">創作工作台</Link><Link href="/login">登入帳戶</Link></nav>
+        <nav className={styles.footerLinks} aria-label="頁尾導覽"><Link href="/studio">創作工作台</Link></nav>
       </footer>
     </div>
   );

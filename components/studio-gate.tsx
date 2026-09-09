@@ -8,12 +8,15 @@ import { AccountContext } from "@/hooks/use-account";
 import Studio from "@/components/studio";
 
 const guestUser:AccountUser={id:"guest",email:"",displayName:"游客创作者"};
+const GUEST_ONLY = process.env.NEXT_PUBLIC_GUEST_ONLY !== "false";
 
 export default function StudioGate(){
   const router=useRouter();
   const [user,setUser]=useState<AccountUser|null>(null),[loading,setLoading]=useState(true);
   const alive=useRef(true);
   useEffect(()=>{
+    // First public release is guest-only; account infrastructure remains available for a later rollout.
+    if (GUEST_ONLY) { setLoading(false); return; }
     alive.current=true;
     const timer=window.setTimeout(async()=>{
       try{
