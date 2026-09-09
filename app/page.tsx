@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import styles from "./home.module.css";
 
 export const metadata: Metadata = {
@@ -29,7 +28,6 @@ export default function Home() {
         </Link>
         <nav className={styles.nav} aria-label="首頁導覽">
           <a className={styles.aboutLink} href="#craft">The process</a>
-          <LanguageSwitcher />
           <Button asChild className={styles.navCta}>
             <Link href="/studio">Open studio <ArrowUpRight aria-hidden="true" /></Link>
           </Button>
