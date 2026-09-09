@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import styles from "./home.module.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ const steps = [
 
 export default function Home() {
   return (
-    <div className={`home-page ${styles.page}`} lang="zh-Hant">
+    <div className={`home-page ${styles.page}`} lang="en">
       <a className={styles.skip} href="#main">跳至主要內容</a>
       <header className={styles.header}>
         <Link href="/" className={styles.brand} aria-label="珠序首頁">
@@ -27,10 +28,11 @@ export default function Home() {
           <span>BEAD<br />ATELIER</span>
         </Link>
         <nav className={styles.nav} aria-label="首頁導覽">
-          <a className={styles.aboutLink} href="#craft">關於創作</a>
-          <Link href="/login">登入</Link>
+          <a className={styles.aboutLink} href="#craft">The process</a>
+          <LanguageSwitcher />
+          <Link href="/login">Sign in</Link>
           <Button asChild className={styles.navCta}>
-            <Link href="/studio">進入工作台 <ArrowUpRight aria-hidden="true" /></Link>
+            <Link href="/studio">Open studio <ArrowUpRight aria-hidden="true" /></Link>
           </Button>
         </nav>
       </header>
@@ -39,18 +41,18 @@ export default function Home() {
         <section className={styles.hero} aria-labelledby="hero-title">
           <div className={styles.heroCopy}>
             <p className={styles.eyebrow}>A SMALL BEAD. AN INFINITE WORLD.</p>
-            <h1 id="hero-title">讓靈感，<span>一顆顆成形。</span></h1>
+            <h1 id="hero-title">Make an idea, <span>bead by bead.</span></h1>
             <p className={styles.heroEnglish}>The art of little things.</p>
             <p className={styles.heroDescription}>
-              一顆珠，一抹色，一段專屬的節奏。<br />
-              在珠序，把心裡的想像，<br />
-              編織成可以佩戴的日常藝術。
+              One bead, one colour, one rhythm of your own.<br />
+              Turn a quiet idea into<br />
+              wearable, everyday art.
             </p>
             <div className={styles.heroActions}>
               <Button asChild className={styles.primaryCta}>
-                <Link href="/studio">開始你的創作 <ArrowUpRight aria-hidden="true" /></Link>
+                <Link href="/studio">Start creating <ArrowUpRight aria-hidden="true" /></Link>
               </Button>
-              <span className={styles.guestNote}>無需登入<br />從第一顆珠開始</span>
+              <span className={styles.guestNote}>No sign-in needed<br />Start with one bead</span>
             </div>
             <div className={styles.heroFoot}>
               <a href="#craft" className={styles.scrollLink}><ArrowDown aria-hidden="true" /> 探索創作的可能</a>

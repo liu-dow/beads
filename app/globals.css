@@ -18,6 +18,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:#f7f9f6;color:#253e34;font-family:var(--font-sans);font-size:16px;-webkit-font-smoothing:antialiased}
+.language-switcher select{appearance:none;border:1px solid #d9e3d8;background:transparent;border-radius:999px;padding:7px 10px;color:inherit;font:inherit;font-size:12px;cursor:pointer}
 .home-page{--home-paper:#f6f5f1;--home-ink:#193d37;--home-muted:#596d65;--home-line:#d4dbd2;--home-accent:#bc643e;--home-serif:"Songti SC","STSong","Noto Serif CJK SC","PMingLiU",serif;--home-display:"Bodoni 72","Didot","Times New Roman",serif}
 button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 button{cursor:pointer}button:disabled{cursor:not-allowed}button,input,textarea{font:inherit}

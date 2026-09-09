@@ -1,5 +1,7 @@
 "use client";
 
+import "./bead-library.css";
+
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowLeftRight, BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Grid2X2, Plus, Search, ShieldAlert, SlidersHorizontal, Star, X } from "lucide-react";
 import { toast } from "sonner";
@@ -48,6 +50,7 @@ export default function BeadLibrary({ open, onOpenChange, ...props }: Props & { 
         <header className="catalog-header">
           <BookOpen className="catalog-header-icon" size={22} />
           <DialogHeader>
+            <span className="catalog-eyebrow">THE MATERIAL EDIT</span>
             <DialogTitle>专业珠子库</DialogTitle>
             <DialogDescription>MIYUKI Delica <span>11/0 · 圆柱米珠 · {BEAD_CATALOG.length} 款精选</span></DialogDescription>
           </DialogHeader>
@@ -204,7 +207,7 @@ export function CatalogBrowser({ design, selected, onApply }: Props) {
         </div>
 
         <section className={`catalog-comparison ${!compared.length ? "is-empty" : ""}`} aria-label="珠子比色">
-          <div className="catalog-comparison-heading"><ArrowLeftRight size={17} /><span>比色</span><small>{compared.length} / 4</small></div>
+          <div className="catalog-comparison-heading"><ArrowLeftRight size={17} /><span>配色工作台</span><small>{compared.length} / 4</small></div>
           <div className="catalog-comparison-items">{Array.from({ length: 4 }, (_, i) => {
             const b = compared[i];
             return b ? <div className="catalog-comparison-item" key={b.id}>

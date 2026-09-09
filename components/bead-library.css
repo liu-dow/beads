@@ -1,0 +1,99 @@
+/* Material catalog: bounded browsing, independent detail scroll, fixed actions. */
+.bead-library-dialog.bead-library-dialog{max-width:1240px!important;height:min(920px,92dvh);border:1px solid #dce2d9;border-radius:18px;background:#fafbf8;box-shadow:0 28px 100px #152b3040}
+.bead-library-dialog .catalog-header{display:flex;align-items:center;gap:16px;padding:22px 26px;background:#f8f9f5;border-bottom:1px solid #e1e5dc}
+.catalog-header-icon{flex-shrink:0;box-sizing:content-box;padding:14px;background:#e7ece2;border:1px solid #d9e1d3;border-radius:14px;color:#355847}
+.catalog-eyebrow{font-size:10px;letter-spacing:.2em;color:#788371;font-weight:600}
+.bead-library-dialog .catalog-header [data-slot=dialog-header]{gap:3px;text-align:left}
+.bead-library-dialog .catalog-header [data-slot=dialog-title]{font-size:24px;letter-spacing:.04em;color:#213f33}
+.bead-library-dialog .catalog-header [data-slot=dialog-description]{font-size:12px;margin:0;padding:0}
+.catalog-header [data-slot=dialog-description] span{margin-left:10px;color:#768175}
+.catalog-close{margin-left:auto;flex-shrink:0;align-self:flex-start;border-radius:50%;color:#68796d}
+.bead-library-dialog .catalog-main{grid-template-columns:minmax(0,1fr) 320px}
+.catalog-browse-pane{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+.catalog-controls{padding:18px 22px 14px;background:#fff;border-bottom:1px solid #e7ebe3;flex-shrink:0}
+.catalog-scope-tabs{width:100%;height:39px!important;justify-content:flex-start;gap:22px;padding:0!important;border-radius:0!important;background:transparent!important;border-bottom:1px solid #e7ebe3}
+.catalog-scope-tabs [data-slot=tabs-trigger]{height:39px;flex:0 1 auto;gap:6px;padding:0 0 10px;border:0;border-bottom:2px solid transparent;border-radius:0;box-shadow:none!important;font-size:13px;color:#7a837b;white-space:nowrap}
+.catalog-scope-tabs [data-slot=tabs-trigger][data-state=active]{border-bottom-color:#345a46;color:#244d38;background:transparent}
+.catalog-scope-tabs [data-slot=tabs-trigger] span{font-size:10px;font-variant-numeric:tabular-nums;background:#eff2ec;border-radius:5px;padding:1px 5px}
+.catalog-search-row{display:flex;gap:8px;margin-top:16px}
+.catalog-search-row .catalog-search{flex:1}
+.bead-library-dialog .catalog-search input{height:42px;border-color:#e1e6dd;background:#f8faf6;border-radius:9px;padding-left:37px;box-shadow:none;font-size:13px}
+.catalog-filter-toggle{position:relative;width:42px;height:42px;border-radius:9px;flex-shrink:0;color:#526b58}
+.catalog-filter-toggle.selected{background:#eaf0e5;border-color:#aebfa5}
+.catalog-filter-toggle>span{position:absolute;right:-3px;top:-4px;background:#365d44;color:white;border-radius:10px;font-size:10px;min-width:16px}
+.bead-library-dialog .catalog-families{align-items:center;justify-content:flex-start;gap:6px;margin-top:12px;padding:3px 0;scrollbar-width:thin}
+.catalog-family-label{font-size:11px;color:#7b877b;margin-right:5px;flex-shrink:0}
+.bead-library-dialog .catalog-families>button{width:30px;height:30px;flex-basis:30px;border-radius:50%;padding:4px}
+.bead-library-dialog .catalog-families>button>span{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 1px 2px #ffffff50}
+.bead-library-dialog .catalog-families>button.selected{border-color:#385b45;background:white;box-shadow:0 0 0 2px #e7eee2}
+.catalog-advanced:not([hidden]){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-top:14px}
+.catalog-advanced>div{min-width:0}.catalog-advanced>div>span{display:block;font-size:11px;color:#70816f;margin-bottom:6px}
+.catalog-advanced [data-slot=select-trigger]{width:100%;font-size:12px;min-width:0;height:36px}
+.bead-library-dialog .catalog-results{flex:1;min-height:0;padding:18px 22px;background:#f5f7f2}
+.bead-library-dialog .catalog-grid{gap:12px}
+.bead-library-dialog .catalog-item{position:relative;border:1px solid #e0e6da;border-radius:11px;transition:border-color .18s,box-shadow .18s}
+.bead-library-dialog .catalog-item:hover{border-color:#a8b79e;box-shadow:0 4px 12px #3448280a}
+.bead-library-dialog .catalog-item.active{border-color:#4d7153;box-shadow:0 0 0 1px #4d7153}
+.bead-library-dialog .catalog-item-preview{padding:0;display:flex}
+.catalog-item-swatch{position:relative;display:grid;place-items:center;padding:19px 13px 10px;background:radial-gradient(ellipse at 50% 40%,#fff,#edf0e7);border-bottom:1px solid #edf0e8}
+.bead-library-dialog .catalog-item-preview .catalog-sample{width:100%;margin:0;max-height:108px;filter:drop-shadow(0 6px 4px #28362516)}
+.catalog-item-copy{display:flex;flex-direction:column;padding:10px 12px 8px;gap:2px}
+.bead-library-dialog .catalog-code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:13px;letter-spacing:.04em}
+.bead-library-dialog .catalog-name{font-size:11px;min-height:33px;line-height:1.5;color:#75806f}
+.catalog-added{position:absolute;left:7px;top:7px;display:flex;align-items:center;gap:3px;background:#f8fff2e8;color:#45633b;font-size:10px;border-radius:4px;padding:2px 5px}
+.catalog-favorite{position:absolute;right:6px;top:6px;display:grid;place-items:center;width:29px;height:29px;background:#ffffffd9;border:1px solid #e4e8df;border-radius:50%;color:#7e8776}
+.catalog-favorite.is-favorite{color:#a67b2a;background:#fff9e9}
+.bead-library-dialog .catalog-item-actions{height:32px;padding:3px 10px;border-color:#edf0e8;justify-content:space-between}
+.bead-library-dialog .catalog-item-actions label{margin-left:0;font-size:11px;gap:6px;min-height:26px}
+.catalog-care.care{color:#a38243!important}.catalog-care.sensitive{color:#b16c50!important}
+.bead-library-dialog .catalog-pagination{padding:10px 22px;min-height:56px;border-top:1px solid #e2e8dc;background:#fff;flex-shrink:0;gap:12px}
+.bead-library-dialog .catalog-pagination>span{font-size:11px;color:#788474}
+.catalog-pagination>[data-slot=select-trigger]{width:100px;height:32px;font-size:11px;flex-shrink:0}
+.catalog-page-buttons{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:11px;color:#64785d}
+.catalog-page-buttons button{border-radius:7px}
+.bead-library-dialog .catalog-detail{display:flex;flex-direction:column;overflow:hidden;padding:0;background:#fff;border-left:1px solid #e1e6db}
+.catalog-detail-top{display:flex;align-items:center;gap:8px;padding:16px 20px;border-bottom:1px solid #eef0e9;flex-shrink:0;font-size:11px}
+.catalog-detail-label{color:#7a8674}.catalog-detail-series{margin-left:auto;color:#8b947f;font-size:10px;letter-spacing:.06em}
+.catalog-detail-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:20px;scrollbar-width:thin}
+.bead-library-dialog .catalog-detail-heading h2{font-family:ui-monospace,SFMono-Regular,monospace;font-size:25px;letter-spacing:.02em;font-weight:500}
+.bead-library-dialog .catalog-detail-heading h3{font-size:14px;margin-top:5px}
+.bead-library-dialog .catalog-detail-heading p{font-size:11px;color:#899080}
+.bead-library-dialog .catalog-detail-sample{margin:18px 0 14px;padding:16px 20px 12px;border:1px solid #e8ecdf;border-radius:12px;background:radial-gradient(ellipse at center,#fff,#f0f2e9)}
+.bead-library-dialog .catalog-detail-sample small{font-size:10px;letter-spacing:.08em;color:#91987f}
+.catalog-dimensions{display:grid;grid-template-columns:repeat(3,1fr);padding:12px 0;margin:0;border-bottom:1px solid #e9ece3;text-align:center}
+.catalog-dimensions>div+div{border-left:1px solid #e6eadd}.catalog-dimensions dt{font-size:10px;color:#89927d;margin-bottom:5px}.catalog-dimensions dd{margin:0;font-size:17px;color:#466044;font-variant-numeric:tabular-nums}.catalog-dimensions small{font-size:10px}
+.bead-library-dialog .catalog-specs{font-size:11px;gap:8px;margin:16px 0}
+.bead-library-dialog .catalog-treatment-tags>span{font-size:10px;padding:4px 7px;background:#f0f3eb;border-radius:5px}
+.catalog-durability summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:12px;list-style:none;color:#5f7359}.catalog-durability summary::-webkit-details-marker{display:none}.catalog-durability[open] summary svg{transform:rotate(180deg)}
+.bead-library-dialog .catalog-durability>div{display:block;margin-top:10px}.catalog-durability-records>div{display:grid;grid-template-columns:72px 20px 1fr;gap:5px;font-size:10px;margin:7px 0}.bead-library-dialog .catalog-durability small{font-size:10px}
+.catalog-source-date{font-size:10px;color:#87917d;margin-top:10px}
+.bead-library-dialog .catalog-sources{font-size:10px;margin-bottom:0}
+.bead-library-dialog .catalog-detail-apply{position:static;flex-shrink:0;margin:0;padding:14px 20px 18px;box-shadow:0 -5px 18px #34452805;border-color:#e5e9df;gap:8px}
+.catalog-current-material{display:flex;align-items:center;gap:6px;font-size:10px;color:#7b8672;margin-bottom:3px}.catalog-current-material small{margin-left:auto;font-size:10px}.catalog-current-material b{font-weight:500;color:#516a46}
+.catalog-current-swatch{width:12px;height:12px;border:1px solid #00000015;border-radius:50%;flex-shrink:0}
+.bead-library-dialog .catalog-detail-apply button{border-radius:8px;min-height:38px;font-size:12px}
+.bead-library-dialog .catalog-comparison{padding:12px 22px;gap:18px;background:#fdfefa}
+.catalog-comparison-heading{display:grid;grid-template-columns:18px auto;align-items:center;gap:4px 7px;flex-shrink:0;font-size:12px;color:#526948}.catalog-comparison-heading small{grid-column:2;font-size:10px;color:#8b957f}
+.bead-library-dialog .catalog-comparison-items{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:560px}
+.bead-library-dialog .catalog-comparison-items>div{padding:5px;min-height:40px;gap:7px;border:1px solid #e3e9da;border-radius:7px;background:white}
+.bead-library-dialog .catalog-comparison-items .catalog-comparison-color{position:static;display:block;width:28px;height:28px;flex-shrink:0;border-radius:4px;border:1px solid #00000010;padding:0}
+.catalog-comparison-item>div{display:flex;align-items:center;min-width:0;flex:1}
+.bead-library-dialog .catalog-comparison-items b{font-size:10px;font-family:ui-monospace,SFMono-Regular,monospace}
+.bead-library-dialog .catalog-comparison-item>div>button{position:static;margin-left:auto;display:grid;place-items:center;min-width:22px;min-height:28px}
+.bead-library-dialog .catalog-comparison-items .catalog-comparison-slot{border-style:dashed;justify-content:center;background:transparent;color:#a6b19b;font-size:11px}
+.catalog-add-group{margin-left:auto;border-radius:8px}
+.bead-library-dialog .catalog-disclaimer{background:#f3f5ef;border-color:#e7ebdf;font-size:10px;padding:8px 22px;color:#8a937d}
+.bead-library-dialog button:focus-visible,.bead-library-dialog summary:focus-visible{outline:2px solid #477553;outline-offset:3px}
+@media(max-width:1050px){.bead-library-dialog .catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.bead-library-dialog .catalog-main{grid-template-columns:minmax(0,1fr) 280px}.catalog-controls{padding:14px}.bead-library-dialog .catalog-results{padding:14px}.catalog-scope-tabs{gap:14px}.catalog-comparison-heading{font-size:11px}.bead-library-dialog .catalog-comparison{gap:10px;padding:12px 14px}.bead-library-dialog .catalog-comparison-items b{font-size:9px}}
+@media(max-width:760px){
+ .bead-library-dialog.bead-library-dialog{width:calc(100vw - 16px);height:calc(100dvh - 20px);border-radius:13px}
+ .bead-library-dialog .catalog-header{padding:15px;gap:10px}.catalog-header-icon{padding:9px;border-radius:10px;width:18px;height:18px}.catalog-eyebrow{font-size:8px}.bead-library-dialog .catalog-header [data-slot=dialog-title]{font-size:20px}.bead-library-dialog .catalog-header [data-slot=dialog-description]{font-size:10px}.catalog-header [data-slot=dialog-description] span{margin-left:4px}
+ .bead-library-dialog .catalog-main{display:flex;overflow:hidden}.catalog-browse-pane{flex:1}.bead-library-dialog .catalog-detail{display:none}.catalog-detail-open .catalog-browse-pane{display:none}.bead-library-dialog .catalog-detail-open .catalog-detail{display:flex;flex:1;min-height:0;border:0}
+ .bead-library-dialog .catalog-detail-open .catalog-results{display:block}.bead-library-dialog .catalog-back{display:inline-flex;margin:0;height:30px;font-size:12px;padding:0}.catalog-detail-open .catalog-detail-label{display:none}.catalog-detail-top{padding:8px 16px}
+ .catalog-detail-scroll{padding:16px}.bead-library-dialog .catalog-detail-sample .catalog-sample{width:190px}.bead-library-dialog .catalog-detail-apply{padding:12px 16px}.bead-library-dialog .catalog-detail-sample{margin-top:14px}.bead-library-dialog .catalog-durability-records>div{font-size:12px}
+ .bead-library-dialog .catalog-results{height:auto}.bead-library-dialog .catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.bead-library-dialog .catalog-pagination{padding:8px 14px;gap:7px}.catalog-result-range{display:none}
+ .bead-library-dialog .catalog-comparison{flex-wrap:wrap;padding:9px 14px;gap:8px}.catalog-comparison-heading{display:flex;gap:6px}.bead-library-dialog .catalog-comparison-items{order:3;flex-basis:100%;max-width:none}.bead-library-dialog .catalog-comparison>button{width:auto;height:30px;font-size:11px}.bead-library-dialog .catalog-comparison.is-empty .catalog-comparison-items{display:none}.bead-library-dialog .catalog-comparison.is-empty .catalog-comparison-heading:after{content:"勾选珠子，比较搭配";font-size:10px;color:#87937c}.catalog-comparison.is-empty .catalog-comparison-heading small{display:none}
+ .bead-library-dialog .catalog-disclaimer{padding:7px 14px;font-size:9px}.catalog-scope-tabs{gap:18px}
+}
+@media(max-width:440px){.bead-library-dialog .catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-advanced:not([hidden]){grid-template-columns:1fr}.catalog-controls{max-height:45dvh;overflow-y:auto}.catalog-header [data-slot=dialog-description] span{display:block;margin-left:0}.catalog-scope-tabs{gap:12px}.catalog-scope-tabs [data-slot=tabs-trigger]{font-size:12px}.bead-library-dialog .catalog-comparison-items>div{gap:4px;padding:4px;flex-direction:column}.catalog-comparison-item>div{width:100%}.bead-library-dialog .catalog-comparison-items .catalog-comparison-color{width:100%;height:22px}.catalog-comparison.is-empty .catalog-comparison-heading:after{max-width:90px}}
+@media(prefers-reduced-motion:reduce){.bead-library-dialog .catalog-item{transition:none}}
