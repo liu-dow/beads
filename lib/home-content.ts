@@ -1,0 +1,8 @@
+export const HOME_FAQS = [
+  { question: "Is the design studio free?", answer: "Yes. You can edit patterns, try the 3D preview, use the bead library, and export PNG images or PDF making charts for free in this release. No account is needed." },
+  { question: "Do I need to know how to bead?", answer: "You can explore colours and design a pattern without any beading experience. Making the physical bracelet does require peyote-stitch skills. Our first-pattern guide helps you use the tool, choose a chart, and prepare your materials." },
+  { question: "Where are my designs saved?", answer: "Select Save work to keep a design in this browser on this device. Guest designs do not sync across devices. Clearing browser data removes them, so export images and charts you want to keep. Exports are not editable project backups." },
+  { question: "Can I change a pattern from the gallery?", answer: "Yes. Choose Customize on a studio original, or try a palette on its detail page. The studio opens an independent editable copy. The original stays in the gallery, and your changes stay with your own design." },
+  { question: "What does the PDF include?", answer: "An English A4 landscape document with a design overview, numbered chart sections, bead symbols, and material quantities. The material list includes your reserve allowance and subtracts any stock you have entered from the quantities to buy." },
+  { question: "Will the real beads match the screen?", answer: "Screen colours and 3D finishes are approximations. Use the catalogue's manufacturer codes to identify beads, then check the physical colours and finishes before making. Estimated bracelet dimensions also vary with beads, thread, and tension." },
+];

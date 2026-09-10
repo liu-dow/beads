@@ -5,26 +5,26 @@ export type Design = { id: string; title: string; author: string; description: s
 export const DEFAULT_FIT: Fit = { wrist: 170, clasp: 10, ease: 10, allowance: 5 };
 export const MAX_COLORS = 64;
 export type Preset = "coast" | "nocturne" | "bloom" | "aurora";
-export const FINISH_NAMES: Record<Finish,string> = {matte:"哑光",gloss:"亮面",metal:"金属",pearl:"珠光",glass:"透色玻璃"};
+export const FINISH_NAMES: Record<Finish,string> = {matte:"Matte",gloss:"Glossy",metal:"Metallic",pearl:"Pearl",glass:"Transparent glass"};
 export const INITIAL_PALETTE: BeadColor[] = [
-  {id:"A",name:"曜石黑",hex:"#202729",finish:"matte"},
-  {id:"B",name:"潟湖蓝",hex:"#36afc3",finish:"gloss"},
-  {id:"C",name:"深海蓝",hex:"#235786",finish:"gloss"},
-  {id:"D",name:"香槟金",hex:"#c9a45c",finish:"metal"},
-  {id:"E",name:"珍珠白",hex:"#eff1e5",finish:"pearl"},
-  {id:"F",name:"冰川青",hex:"#98d9d5",finish:"gloss"},
-  {id:"G",name:"日落橙",hex:"#ed9935",finish:"gloss"},
-  {id:"H",name:"鸢尾紫",hex:"#7257b4",finish:"gloss"},
-  {id:"I",name:"蔷薇粉",hex:"#dd8dab",finish:"pearl"},
-  {id:"J",name:"苔叶绿",hex:"#528c6b",finish:"matte"},
-  {id:"K",name:"琥珀棕",hex:"#9a553b",finish:"glass"},
-  {id:"L",name:"雾银",hex:"#b4bfbd",finish:"metal"},
+  {id:"A",name:"Obsidian Black",hex:"#202729",finish:"matte"},
+  {id:"B",name:"Lagoon Blue",hex:"#36afc3",finish:"gloss"},
+  {id:"C",name:"Deep Sea Blue",hex:"#235786",finish:"gloss"},
+  {id:"D",name:"Champagne Gold",hex:"#c9a45c",finish:"metal"},
+  {id:"E",name:"Pearl White",hex:"#eff1e5",finish:"pearl"},
+  {id:"F",name:"Glacier Teal",hex:"#98d9d5",finish:"gloss"},
+  {id:"G",name:"Sunset Orange",hex:"#ed9935",finish:"gloss"},
+  {id:"H",name:"Iris Purple",hex:"#7257b4",finish:"gloss"},
+  {id:"I",name:"Rose Pink",hex:"#dd8dab",finish:"pearl"},
+  {id:"J",name:"Moss Green",hex:"#528c6b",finish:"matte"},
+  {id:"K",name:"Amber Brown",hex:"#9a553b",finish:"glass"},
+  {id:"L",name:"Mist Silver",hex:"#b4bfbd",finish:"metal"},
 ];
 export const PRESETS: {id:Preset;name:string;en:string;image:string;description:string}[] = [
-  {id:"coast",name:"海岸回响",en:"Ocean Echoes",image:"/references/coast.png",description:"青蓝、珍珠白与香槟金交织的几何节奏。"},
-  {id:"nocturne",name:"夜色棱镜",en:"Midnight Prism",image:"/references/nocturne.png",description:"曜石黑衬托流动的蓝金菱形。"},
-  {id:"bloom",name:"繁花织梦",en:"Woven Blooms",image:"/references/bloom.png",description:"在深色底布上，编织一场绚丽的花事。"},
-  {id:"aurora",name:"极光信笺",en:"Aurora Notes",image:"/references/aurora.png",description:"细碎的色彩，像夜空中轻盈的光点。"},
+  {id:"coast",name:"Coastal Echoes",en:"Ocean Echoes",image:"/references/coast.png",description:"A geometric rhythm of turquoise, pearl white, and champagne gold."},
+  {id:"nocturne",name:"Midnight Prism",en:"Midnight Prism",image:"/references/nocturne.png",description:"Blue and gold diamonds against an obsidian ground."},
+  {id:"bloom",name:"Woven Blooms",en:"Woven Blooms",image:"/references/bloom.png",description:"Vivid flowers woven across a dark background."},
+  {id:"aurora",name:"Aurora Notes",en:"Aurora Notes",image:"/references/aurora.png",description:"Small accents of colour, like lights in the night sky."},
 ];
 export function makePattern(preset:Preset,rows:number,cols:number):number[]{
   return Array.from({length:rows*cols},(_,i)=>{
@@ -57,7 +57,7 @@ export function makePattern(preset:Preset,rows:number,cols:number):number[]{
 }
 export function createDesign(preset:Preset="coast",rows=22,cols=112):Design{
   const info=PRESETS.find(p=>p.id===preset)!;const now=new Date().toISOString();
-  return {id:"",title:info.name,author:"独立创作者",description:info.description,rows,cols,size:1.6,cells:makePattern(preset,rows,cols),palette:INITIAL_PALETTE.map(p=>({...p})),createdAt:now,updatedAt:now};
+  return {id:"",title:info.name,author:"Independent maker",description:info.description,rows,cols,size:1.6,cells:makePattern(preset,rows,cols),palette:INITIAL_PALETTE.map(p=>({...p})),createdAt:now,updatedAt:now};
 }
 export function materialCounts(d:Design){
   const counts=Array(d.palette.length).fill(0) as number[];
@@ -82,7 +82,7 @@ export function nextColorId(palette:BeadColor[]){
     const id=n<26?String.fromCharCode(65+n):String.fromCharCode(64+Math.floor(n/26))+String.fromCharCode(65+n%26);
     if(!palette.some(p=>p.id===id))return id;
   }
-  throw new Error("色号已用完");
+  throw new Error("No colour codes available");
 }
 export function removeColor(d:Design,index:number,replacement:number):Design{
   if(d.palette.length<2||index===replacement||!d.palette[index]||!d.palette[replacement])return d;

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { I18nRuntime } from "@/components/i18n-runtime";
 
 export const metadata: Metadata = {
   title: "Bead Atelier · Beadwork design studio",
@@ -18,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased"><I18nRuntime />{children}</body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

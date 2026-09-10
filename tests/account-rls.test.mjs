@@ -18,7 +18,7 @@ for(const name of readdirSync('supabase/migrations').filter(n=>n.endsWith('.sql'
 const alice="11111111-1111-4111-8111-111111111111",bob="22222222-2222-4222-8222-222222222222";
 await db.query('insert into auth.users values ($1),($2)',[alice,bob]);
 after(()=>db.close());
-const payload={title:"海岸",author:"同名作者",rows:8,cols:48,cells:Array(384).fill(0),palette:[{id:"A",name:"黑",hex:"#000000",finish:"matte"}]};
+const payload={title:"Coast",author:"Shared author name",rows:8,cols:48,cells:Array(384).fill(0),palette:[{id:"A",name:"Black",hex:"#000000",finish:"matte"}]};
 const asUser=(id,fn)=>db.transaction(async tx=>{await tx.exec('set local role authenticated');await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[id]);return fn(tx);});
 const insertDesign=(user,data=payload)=>asUser(user,tx=>tx.query('insert into public.designs(data) values($1) returning id,owner_id',[JSON.stringify(data)]));
 const a=(await insertDesign(alice)).rows[0].id,b=(await insertDesign(bob,{...payload,title:"B"})).rows[0].id;
@@ -30,14 +30,14 @@ test('owners see only their records, including same author names',async()=>{
 test('guessed IDs cannot read or update another owner',async()=>{
   assert.equal((await asUser(bob,tx=>tx.query('select data from public.designs where id=$1',[a]))).rows.length,0);
   assert.equal((await asUser(bob,tx=>tx.query('update public.designs set data=$1 where id=$2 returning id',[JSON.stringify({...payload,title:"stolen"}),a]))).rows.length,0);
-  assert.equal((await asUser(alice,tx=>tx.query('select data from public.designs where id=$1',[a]))).rows[0].data.title,"海岸");
+  assert.equal((await asUser(alice,tx=>tx.query('select data from public.designs where id=$1',[a]))).rows[0].data.title,"Coast");
 });
 test('cannot spoof an owner or transfer ownership',async()=>{
   await assert.rejects(asUser(bob,tx=>tx.query('insert into public.designs(owner_id,data) values($1,$2)',[alice,JSON.stringify(payload)])),e=>e.code==='42501');
   await assert.rejects(asUser(alice,tx=>tx.query('update public.designs set owner_id=$1 where id=$2',[bob,a])),e=>e.code==='42501');
 });
 test('owner can update content, but not server timestamps',async()=>{
-  await asUser(alice,tx=>tx.query('update public.designs set data=$1 where id=$2',[JSON.stringify({...payload,author:"新署名"}),a]));
+  await asUser(alice,tx=>tx.query('update public.designs set data=$1 where id=$2',[JSON.stringify({...payload,author:"New author"}),a]));
   assert.equal((await asUser(alice,tx=>tx.query('select owner_id from public.designs where id=$1',[a]))).rows[0].owner_id,alice);
   await assert.rejects(asUser(alice,tx=>tx.query("update public.designs set created_at='2000-01-01' where id=$1",[a])),e=>e.code==='42501');
 });
@@ -67,7 +67,7 @@ test('statistics RPC is invoker-scoped and cannot reveal another user',async()=>
   assert.deepEqual(aStats.designs,{count:1,beads:384});
   assert.deepEqual(aStats.exports,[{format:'pdf',count:1}]);
   assert.deepEqual(bStats.exports,[{format:'png',count:1}]);
-  assert.equal(bStats.authors[0].name,'同名作者');
+  assert.equal(bStats.authors[0].name,'Shared author name');
 });
 test('anonymous access to all business tables and statistics is denied',async()=>{
   for(const query of ['select * from public.designs','select * from public.making_progress','select * from public.exports','select public.my_design_stats()']) {

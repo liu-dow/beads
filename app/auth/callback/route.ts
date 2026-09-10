@@ -4,7 +4,7 @@ import { safeNext } from "@/lib/auth/redirect";
 
 export async function GET(request: Request) {
   const ctx = createRequestClient(request);
-  if (!ctx) return privateJson({error:"账户服务暂未配置。"},503);
+  if (!ctx) return privateJson({error:"Account services are not configured."},503);
   const url = new URL(request.url), code = url.searchParams.get("code");
   if (code && !url.searchParams.has("error")) {
     const {error} = await ctx.supabase.auth.exchangeCodeForSession(code);

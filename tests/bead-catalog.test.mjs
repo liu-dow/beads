@@ -26,7 +26,7 @@ test("SKU search normalizes zero padding, spaces, manufacturer names and hyphens
     assert.equal(normalizeBeadCode(q),"DB0010");assert.deepEqual(filterCatalog({query:q}).map(b=>b.code),["DB0010"]);
   }
   assert.equal(filterCatalog({query:"DB9999"}).length,0);
-  assert.ok(filterCatalog({query:"不透明红"}).some(b=>b.code==="DB0723"));
+  assert.ok(filterCatalog({query:"Opaque Red"}).some(b=>b.code==="DB0723"));
   assert.ok(filterCatalog({query:"blue AB"}).some(b=>b.code==="DB0215"));
 });
 test("catalog filters intersect correctly and favorites are not confused with stock",()=>{
@@ -77,7 +77,7 @@ test("replacing with an existing material merges cells and preserves that materi
 });
 test("size changes require explicit confirmation and retain the exact cell grid",()=>{
   const d={...createDesign(),size:1.3},b=bead("DB0200");
-  assert.throws(()=>applyCatalogBeads(d,[b.id]),/规格/);
+  assert.throws(()=>applyCatalogBeads(d,[b.id]),/bead size/);
   const result=applyCatalogBeads(d,[b.id],"add",0,true);
   assert.equal(result.design.size,1.6);assert.deepEqual(result.design.cells,d.cells);assert.equal(d.size,1.3);
 });
@@ -85,9 +85,9 @@ test("palette capacity and invalid requests fail atomically",()=>{
   const d=createDesign();while(d.palette.length<MAX_COLORS)d.palette.push({...d.palette[0],id:nextColorId(d.palette)});
   const before=JSON.stringify(d);
   assert.throws(()=>applyCatalogBeads(d,[bead("DB0010").id]),/64/);
-  assert.throws(()=>applyCatalogBeads(d,["missing"]),/不存在/);
-  assert.throws(()=>applyCatalogBeads(d,[]),/选择/);
-  assert.throws(()=>applyCatalogBeads(d,[bead("DB0010").id],"replace",999),/目标/);
+  assert.throws(()=>applyCatalogBeads(d,["missing"]),/not in the catalogue/);
+  assert.throws(()=>applyCatalogBeads(d,[]),/Select /);
+  assert.throws(()=>applyCatalogBeads(d,[bead("DB0010").id],"replace",999),/target colour/);
   assert.equal(JSON.stringify(d),before);
 });
 test("catalog identity persists through save and rejects counterfeit metadata",()=>{
@@ -99,12 +99,12 @@ test("catalog identity persists through save and rejects counterfeit metadata",(
 test("customized color attributes detach provenance; names and stock do not",()=>{
   const p=applyCatalogBeads(createDesign(),[bead("DB0010").id]).design.palette[12];
   for(const patch of [{hex:"#ffffff"},{finish:"glass"},{sku:"custom"}])assert.equal(editMaterial(p,patch).catalogId,undefined);
-  for(const patch of [{name:"我的黑色"},{stock:20},{hex:p.hex.toUpperCase()}])assert.ok(linkedCatalogBead(editMaterial(p,patch)));
+  for(const patch of [{name:"My black"},{stock:20},{hex:p.hex.toUpperCase()}])assert.ok(linkedCatalogBead(editMaterial(p,patch)));
 });
 test("catalog UI exposes real material controls without prices or reference artwork",async()=>{
   const {CatalogBrowser}=await vite.ssrLoadModule("/components/bead-library.tsx");
   const html=renderToStaticMarkup(React.createElement(CatalogBrowser,{design:createDesign(),selected:1,onApply:()=>{}}));
-  assert.match(html,/搜索珠子色号或名称/);assert.match(html,/原厂耐久性记录/);
-  assert.match(html,/DB0001/);assert.match(html,/加入作品配色/);assert.match(html,/近似色样/);
-  assert.doesNotMatch(html,/单价|价格|金额|参考作品|[¥￥]/);
+  assert.match(html,/Search bead codes or names/);assert.match(html,/Manufacturer durability record/);
+  assert.match(html,/DB0001/);assert.match(html,/Add to palette/);assert.match(html,/Approximate swatch|Screen approximation/);
+  assert.doesNotMatch(html,/Unit price|Estimated cost|[¥￥]/i);
 });

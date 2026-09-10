@@ -7,7 +7,7 @@ const EXPORTS_KEY = "bead-atelier:guest:exports:v1";
 type GuestExport = { format: "png" | "pdf"; createdAt: string };
 
 function storage() {
-  if (typeof window === "undefined") throw new Error("本机存储不可用。");
+  if (typeof window === "undefined") throw new Error("Local storage is unavailable.");
   return window.localStorage;
 }
 
@@ -26,7 +26,7 @@ export function saveGuestDesign(design: Design) {
   const now = new Date().toISOString();
   const saved = { ...design, id: design.id || crypto.randomUUID(), createdAt: design.id ? design.createdAt : now, updatedAt: now };
   const parsed = designSchema.safeParse(saved);
-  if (!parsed.success) throw new Error("请检查作品名称、作者和图案尺寸。");
+  if (!parsed.success) throw new Error("Check the title, author, and pattern dimensions.");
   const designs = loadGuestDesigns().filter(item=>item.id!==saved.id);
   storage().setItem(DESIGNS_KEY, JSON.stringify([parsed.data,...designs].slice(0,100)));
   return parsed.data;

@@ -6,11 +6,12 @@ import type { AccountUser } from "@/lib/auth/user";
 import { accountAction } from "@/lib/auth/client";
 import { AccountContext } from "@/hooks/use-account";
 import Studio from "@/components/studio";
+import type { Design } from "@/lib/design";
 
-const guestUser:AccountUser={id:"guest",email:"",displayName:"游客创作者"};
+const guestUser:AccountUser={id:"guest",email:"",displayName:"Guest creator"};
 const GUEST_ONLY = process.env.NEXT_PUBLIC_GUEST_ONLY !== "false";
 
-export default function StudioGate(){
+export default function StudioGate({initialDesign}:{initialDesign?:Design}){
   const router=useRouter();
   const [user,setUser]=useState<AccountUser|null>(null),[loading,setLoading]=useState(true);
   const alive=useRef(true);
@@ -38,7 +39,7 @@ export default function StudioGate(){
   },[router,userId]);
   const signOut=useCallback(async()=>{await accountAction("logout",{});setUser(null);router.replace("/login");},[router]);
   const openLogin=useCallback(async()=>{router.push("/login");},[router]);
-  if(loading)return <div className="account-screen"><div className="account-card account-loading" role="status"><LoaderCircle className="animate-spin"/><p>正在打开工作台…</p></div></div>;
-  if(user)return <AccountContext.Provider value={{user,guest:false,apiFetch,signOut}}><Studio key={user.id}/></AccountContext.Provider>;
-  return <AccountContext.Provider value={{user:guestUser,guest:true,apiFetch:async()=>Response.json({error:"游客数据仅保存在本机。"},{status:403}),signOut:openLogin}}><Studio key="guest"/></AccountContext.Provider>;
+  if(loading)return <div className="account-screen"><div className="account-card account-loading" role="status"><LoaderCircle className="animate-spin"/><p>Opening studio…</p></div></div>;
+  if(user)return <AccountContext.Provider value={{user,guest:false,apiFetch,signOut}}><Studio key={user.id} initialDesign={initialDesign}/></AccountContext.Provider>;
+  return <AccountContext.Provider value={{user:guestUser,guest:true,apiFetch:async()=>Response.json({error:"Guest data is saved only on this device."},{status:403}),signOut:openLogin}}><Studio key="guest" initialDesign={initialDesign}/></AccountContext.Provider>;
 }

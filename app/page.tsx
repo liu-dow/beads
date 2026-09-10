@@ -1,115 +1,69 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUpRight, Gem } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Gem, Check, Grid2X2, Box, FileDown, MousePointer2, Palette, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { HomeDesignDemo } from "@/components/home-design-demo";
+import { SampleChartDownload } from "@/components/sample-chart-download";
+import { PUBLIC_WORKS, studioUrl, workPalette } from "@/lib/portfolio";
+import { BEAD_CATALOG } from "@/lib/bead-catalog";
+import { HOME_FAQS } from "@/lib/home-content";
+import { publicOrigin } from "@/lib/server/public-origin";
+import { jsonLd, portfolioMetadata } from "@/lib/portfolio-seo";
 import styles from "./home.module.css";
 
-export const metadata: Metadata = {
-  title: "珠序 Bead Atelier · 讓靈感，一顆顆成形",
-  description: "從一顆米珠開始，編織你的色彩與想像。珠序提供圖案設計、3D 材質預覽與製作圖紙，無需登入即可開始創作。",
-};
+export function generateMetadata() {
+  return portfolioMetadata(publicOrigin(), "/", "Free Peyote Bracelet Pattern Maker & 3D Preview | Bead Atelier", "Create your own bead bracelet patterns, try colours in 3D, and download printable making charts. Explore free patterns and real bead references. No sign-up needed.");
+}
 
+const featured = [PUBLIC_WORKS[0], PUBLIC_WORKS[2], PUBLIC_WORKS[1]];
+const sample = PUBLIC_WORKS[0];
+const materials = ["DB0010", "DB0044", "DB0031", "DB0200"].flatMap(code => BEAD_CATALOG.filter(bead => bead.code === code));
 const steps = [
-  { number: "01", title: "把色彩，編進靈感裡。", body: "自由繪製圖案，挑選米珠配色。從一個小小的幾何，延伸出屬於你的節奏。" },
-  { number: "02", title: "在動手之前，看見成品。", body: "旋轉 3D 預覽，觀察光澤、材質與成環效果，讓平面的想像有了立體的模樣。" },
-  { number: "03", title: "讓每一顆，都有跡可循。", body: "帶著圖紙與材料清單開始編織，逐列記錄製作進度，慢慢完成一件自己的作品。" },
+  { icon: <MousePointer2/>, title: "Start with a spark", body: "Choose a pattern from the gallery or open a blank chart. A favourite colour is enough to begin." },
+  { icon: <Palette/>, title: "Make it yours", body: "Paint, fill, mirror, and repeat. Explore your colours in 3D and adjust the bracelet to your wrist." },
+  { icon: <FileDown/>, title: "Take it to the workbench", body: "Save your design, export the chart, and follow your progress as you make it bead by bead." },
 ];
 
 export default function Home() {
-  return (
-    <div className={`home-page ${styles.page}`} lang="en">
-      <a className={styles.skip} href="#main">跳至主要內容</a>
-      <header className={styles.header}>
-        <Link href="/" className={styles.brand} aria-label="珠序首頁">
-          <Gem aria-hidden="true" />
-          <strong>珠序</strong>
-          <span>BEAD<br />ATELIER</span>
-        </Link>
-        <nav className={styles.nav} aria-label="首頁導覽">
-          <a className={styles.aboutLink} href="#craft">The process</a>
-          <Button asChild className={styles.navCta}>
-            <Link href="/studio">Open studio <ArrowUpRight aria-hidden="true" /></Link>
-          </Button>
-        </nav>
-      </header>
+  const origin = publicOrigin(), counts = workPalette(sample);
+  return <div className={`home-page ${styles.page}`} lang="en">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd({ "@context": "https://schema.org", "@type": "WebApplication", name: "Bead Atelier", applicationCategory: "DesignApplication", operatingSystem: "Web browser", description: "A free peyote bracelet pattern maker with 3D previews and printable making charts.", ...(origin ? { url: origin } : {}), offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } }) }}/>
+    <a className={styles.skip} href="#main">Skip to main content</a>
+    <header className={styles.header}>
+      <Link href="/" className={styles.brand} aria-label="Bead Atelier home"><Gem aria-hidden="true"/><strong>Bead Atelier<span>.</span></strong></Link>
+      <nav className={styles.nav} aria-label="Main navigation"><Link href="/portfolio">Patterns</Link><a className={styles.desktopLink} href="#how-it-works">How it works</a><Link className={styles.desktopLink} href="/patterns/first-peyote-pattern">Maker's guide</Link><Button asChild className={styles.navCta}><Link href="/studio">Open studio <ArrowUpRight size={16}/></Link></Button></nav>
+    </header>
+    <main id="main" className={styles.main}>
+      <section className={styles.hero} aria-labelledby="hero-title">
+        <div className={styles.heroCopy}><p className={styles.eyebrow}>FREE PEYOTE BRACELET PATTERN MAKER</p><h1 id="hero-title">Your next bracelet,<br/><em>imagined by you.</em></h1><p className={styles.heroDescription}>Turn the colours you love into something you can wear. Design a bead pattern, explore it in 3D, and take a printable chart to your workbench.</p>
+          <div className={styles.heroActions}><Button asChild className={styles.primaryCta}><Link href="/studio">Design a bracelet <ArrowUpRight size={18}/></Link></Button><Link className={styles.textLink} href="/portfolio">Explore free patterns <ArrowUpRight size={16}/></Link></div>
+          <p className={styles.guestNote}><Check size={15}/> No account needed <span>·</span> Free to create & export</p>
+          <a className={styles.heroTryLink} href="#try-it"><span><Palette size={18}/></span><div>Not sure where to start?<b>Try a little colour magic below <ArrowDown size={15}/></b></div></a>
+        </div>
+        <figure className={styles.heroArt}><Image src="/images/home-bracelet.webp" alt="Beadwork inspiration: a turquoise, ivory, and gold geometric bracelet in warm light" fill priority sizes="(max-width: 760px) 100vw, 52vw" unoptimized/><div className={styles.artLabel}><span>THE ART OF LITTLE THINGS</span><i>Colour. Rhythm. Something of your own.</i></div><figcaption>Beadwork inspiration · Digital illustration</figcaption></figure>
+      </section>
+      <div className={styles.utilityStrip} aria-label="Studio capabilities"><span><Grid2X2/>Bead-by-bead pattern editing</span><span><Box/>Interactive 3D preview</span><span><Gem/>Real bead references</span><span><FileDown/>Printable PDF charts</span></div>
 
-      <main id="main" className={styles.main}>
-        <section className={styles.hero} aria-labelledby="hero-title">
-          <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>A SMALL BEAD. AN INFINITE WORLD.</p>
-            <h1 id="hero-title">Make an idea, <span>bead by bead.</span></h1>
-            <p className={styles.heroEnglish}>The art of little things.</p>
-            <p className={styles.heroDescription}>
-              One bead, one colour, one rhythm of your own.<br />
-              Turn a quiet idea into<br />
-              wearable, everyday art.
-            </p>
-            <div className={styles.heroActions}>
-              <Button asChild className={styles.primaryCta}>
-                <Link href="/studio">Start creating <ArrowUpRight aria-hidden="true" /></Link>
-              </Button>
-              <span className={styles.guestNote}>No sign-in needed<br />Start with one bead</span>
-            </div>
-            <div className={styles.heroFoot}>
-              <a href="#craft" className={styles.scrollLink}><ArrowDown aria-hidden="true" /> 探索創作的可能</a>
-              <span>Small things, beautifully made.</span>
-            </div>
-          </div>
-          <figure className={styles.heroArt}>
-            <div className={styles.heroImageWrap}>
-              <span className={styles.artIndex} aria-hidden="true">BEAD STUDY — 001</span>
-              <span className={styles.artCorner} aria-hidden="true">色彩 · 秩序 · 光</span>
-              <Image className={styles.heroImage} src="/images/home-bracelet.webp" alt="青綠、墨黑與香檳金米珠編織的幾何手環，在柔和光影中呈現細緻紋理" fill priority sizes="(max-width: 760px) 88vw, 47vw" unoptimized />
-            </div>
-            <figcaption className={styles.imageCaption}>
-              <div>青綠之間 <small>FORM & COLOUR / 珠織靈感</small></div>
-              <span className={styles.palette} aria-label="墨綠、青綠、香檳金、象牙白配色"><i /><i /><i /><i /></span>
-            </figcaption>
-          </figure>
-        </section>
+      <section id="try-it" className={styles.trySection} aria-labelledby="try-title">
+        <div className={styles.sectionCopy}><p className={styles.eyebrow}>A LITTLE EXPERIMENT</p><h2 id="try-title">Change one colour.<br/><em>Change everything.</em></h2><p>You do not need to begin with a blank canvas. Pick a design, try a different palette, and see what feels like you.</p><ol className={styles.trySteps}><li><span>01</span>Choose a starting pattern.</li><li><span>02</span>Try a palette. Take a look in 3D.</li><li><span>03</span>Open your own copy and keep creating.</li></ol><p className={styles.smallNote}>This preview uses the same pattern data as the studio. The colours you choose travel with you.</p></div>
+        <HomeDesignDemo works={featured}/>
+      </section>
 
-        <section className={styles.intro} aria-labelledby="intro-title">
-          <p className={styles.sectionLabel}><span>01 /</span> THE JOY OF MAKING</p>
-          <h2 id="intro-title">美，藏在細微的秩序裡。<br />而創作，始於你對<em>一點不同</em>的想像。</h2>
-        </section>
+      <section className={styles.patternSection} aria-labelledby="patterns-title"><div className={styles.sectionHeading}><div><p className={styles.eyebrow}>THE STUDIO COLLECTION</p><h2 id="patterns-title">Find your next<br/><em>“I made this.”</em></h2></div><div><p>A flower, a diamond, a favourite shade.<br/>Every pattern is an invitation to make it yours.</p><Link className={styles.textLink} href="/portfolio">Explore all {PUBLIC_WORKS.length} patterns <ArrowUpRight size={16}/></Link></div></div>
+        <div className={styles.patternGrid}>{featured.map(work => <article className={styles.patternCard} key={work.slug}><Link href={`/portfolio/${work.slug}`} aria-label={`Explore ${work.title}`}><img src={`/patterns/${work.slug}.webp`} alt={`${work.title} — ${work.category.toLowerCase()} peyote bracelet pattern`} width={1200} height={960} loading="lazy"/></Link><div className={styles.patternMeta}><span>{work.category}</span><span>{workPalette(work).length} colours</span></div><h3><Link href={`/portfolio/${work.slug}`}>{work.title}</Link></h3><p>Bead Atelier · Studio original</p><Link className={styles.patternCustomize} href={studioUrl(work)}>Customize this pattern <ArrowUpRight size={17}/></Link></article>)}</div>
+      </section>
 
-        <section id="craft" className={styles.craft} aria-labelledby="craft-title">
-          <figure className={styles.detailFigure}>
-            <Image className={styles.detailImage} src="/images/home-weave.webp" alt="近距離觀察青綠與金色米珠的交錯排列、細小孔洞與玻璃光澤" width={1024} height={1280} sizes="(max-width: 760px) 88vw, 42vw" unoptimized />
-            <figcaption><span>一顆顆排列，一點點成為自己。</span><span>A closer look.</span></figcaption>
-          </figure>
-          <div className={styles.craftCopy}>
-            <p className={styles.sectionLabel}><span>02 /</span> FROM IMAGINATION TO FORM</p>
-            <h2 id="craft-title">從螢幕上的靈感，<br />到指尖的作品。</h2>
-            <p className={styles.craftLead}>為喜歡手作的你，留一張自由的工作桌。<br />設計、預覽、製作，讓每一步都更從容。</p>
-            <ol className={styles.steps}>
-              {steps.map(step => <li key={step.number}>
-                <span className={styles.stepNumber} aria-hidden="true">{step.number}</span>
-                <div><h3>{step.title}</h3><p>{step.body}</p></div>
-              </li>)}
-            </ol>
-          </div>
-        </section>
+      <section id="how-it-works" className={styles.processSection} aria-labelledby="process-title"><div className={styles.sectionHeading}><div><p className={styles.eyebrow}>FROM IDEA TO SOMETHING REAL</p><h2 id="process-title">A little less guesswork.<br/><em>A lot more making.</em></h2></div><p>Your pattern, preview, and material list stay together.<br/>Spend your attention on the part you love.</p></div><ol className={styles.processGrid}>{steps.map((step, i) => <li key={step.title}><div className={styles.processNumber}><span>0{i + 1}</span>{step.icon}</div><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol></section>
 
-        <section className={styles.invitation} aria-labelledby="invitation-title">
-          <div>
-            <p className={styles.sectionLabel}>YOUR NEXT LITTLE MASTERPIECE</p>
-            <h2 id="invitation-title">下一件作品，從你開始。</h2>
-            <p>不必準備好所有靈感。先選一個喜歡的顏色。</p>
-          </div>
-          <div className={styles.invitationAction}>
-            <Button asChild className={styles.lightCta}><Link href="/studio">打開創作工作台 <ArrowUpRight aria-hidden="true" /></Link></Button>
-            <span>自由創作 · 3D 預覽 · 圖紙匯出</span>
-          </div>
-        </section>
-      </main>
+      <section className={styles.materialSection} aria-labelledby="materials-title"><div className={styles.materialVisual}><Image src="/images/home-weave.webp" alt="Close-up beadwork illustration showing small cylinder beads and contrasting finishes" width={1122} height={1402} sizes="(max-width: 760px) 100vw, 45vw" unoptimized/><span>THE DETAILS MAKE THE DIFFERENCE</span></div><div className={styles.materialCopy}><p className={styles.eyebrow}>A PALETTE WITH A PRACTICAL SIDE</p><h2 id="materials-title">Beautiful colours.<br/><em>Useful details.</em></h2><p>Explore MIYUKI Delica 11/0 references, compare finishes, and add manufacturer codes to your design. Keep your palette and shopping notes in one place.</p><div className={styles.materialTable}><div className={styles.materialTableHeading}><Gem size={17}/><span>From the bead library</span><small>Delica 11/0</small></div>{materials.map(bead => <div className={styles.materialRow} key={bead.id}><i style={{ background: bead.hex }}/><span>{bead.code}</span><b>{bead.name}</b></div>)}</div><p className={styles.materialNote}>Screen colours are approximate. Check physical beads before making. Manufacturer references do not indicate stock or affiliation.</p><Link className={styles.lightTextLink} href="/studio">Explore materials in the studio <ArrowUpRight size={16}/></Link></div></section>
 
-      <footer className={styles.footer}>
-        <Link href="/" className={styles.footerBrand}>珠序<span>BEAD ATELIER</span></Link>
-        <p>Made for the hands that create.</p>
-        <nav className={styles.footerLinks} aria-label="頁尾導覽"><Link href="/studio">創作工作台</Link></nav>
-      </footer>
-    </div>
-  );
+      <section className={styles.makingSection} aria-labelledby="making-title"><div className={styles.sectionCopy}><p className={styles.eyebrow}>READY FOR YOUR WORKBENCH</p><h2 id="making-title">Your idea deserves<br/><em>more than a screenshot.</em></h2><p>Take an organised chart to your workbench, with colour symbols and the bead quantities you need. Or follow along in Making mode and mark completed columns as you go.</p><ul className={styles.exportFeatures}><li><Check/>Numbered chart sections and bead symbols</li><li><Check/>Material quantities, reserve, and stock</li><li><Check/>PNG previews and English PDF charts</li></ul><SampleChartDownload work={sample}/></div><div className={styles.chartPreview}><div className={styles.chartHeader}><span>BEAD ATELIER / PATTERN NOTES</span><FileDown size={20}/></div><h3>{sample.title}</h3><p>Peyote stitch · {sample.rows} × {sample.cols} beads</p><div className={styles.chartImage}><img src={`/api/portfolio/${sample.slug}/image?full=1`} alt="Complete Tidal Rhythm bead pattern, ready to customize and export" width={1120} height={225} loading="lazy"/></div><div className={styles.chartTable}><div><span>PALETTE</span><span>BEADS</span></div>{counts.map(color => <div key={color.id}><span><i style={{ background: color.hex }}/>{color.id} · {color.name}</span><b>{color.count.toLocaleString("en-US")}</b></div>)}</div><p className={styles.chartCaption}><Ruler size={15}/>Pattern and quantities from the editable design.<br/>The PDF adds numbered sections and bead symbols.</p></div></section>
+
+      <section className={styles.faqSection} aria-labelledby="faq-title"><div><p className={styles.eyebrow}>BEFORE YOUR FIRST BEAD</p><h2 id="faq-title">A few things<br/><em>you might wonder.</em></h2><Link className={styles.textLink} href="/patterns/first-peyote-pattern">Read the first-pattern guide <ArrowUpRight size={16}/></Link></div><Accordion type="single" collapsible defaultValue="0" className={styles.faqList}>{HOME_FAQS.map((item, i) => <AccordionItem value={String(i)} key={item.question}><AccordionTrigger>{item.question}</AccordionTrigger><AccordionContent>{item.answer}</AccordionContent></AccordionItem>)}</Accordion></section>
+
+      <section className={styles.invitation}><div><p className={styles.eyebrow}>THE BEST PART IS MAKING IT YOURS</p><h2>Start with a colour.<br/><em>See where it takes you.</em></h2><p>No perfect plan required. Just a little curiosity.</p></div><div className={styles.invitationAction}><Button asChild className={styles.lightCta}><Link href="/studio">Open the free studio <ArrowUpRight size={20}/></Link></Button><Link href="/portfolio">Or find a pattern you love →</Link><span>No account needed · Save in this browser</span></div></section>
+    </main>
+    <footer className={styles.footer}><Link href="/" className={styles.brand}><Gem size={24}/><strong>Bead Atelier<span>.</span></strong></Link><p>Small things. Made your own.</p><nav aria-label="Footer navigation"><Link href="/portfolio">Patterns</Link><Link href="/patterns/first-peyote-pattern">Maker's guide</Link><Link href="/studio">Design studio</Link></nav></footer>
+  </div>;
 }

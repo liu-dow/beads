@@ -114,7 +114,7 @@ test('signup waits for email confirmation instead of claiming a logged in sessio
 });
 test('password recovery uses a fixed reset callback and a neutral account message',async()=>{
   const response=await action('forgot',{email:'unknown@example.test'});
-  assert.equal(response.status,200);assert.match((await response.json()).message,/如果/);
+  assert.equal(response.status,200);assert.match((await response.json()).message,/If /);
   const sent=requests.findLast(r=>r.url.pathname==='/auth/v1/recover');
   assert.equal(sent.url.searchParams.get('redirect_to'),'https://atelier.example/auth/callback?next=/auth/reset-password');
   assert.ok(sent.body.code_challenge);

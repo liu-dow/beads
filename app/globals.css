@@ -19,6 +19,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:#f7f9f6;color:#253e34;font-family:var(--font-sans);font-size:16px;-webkit-font-smoothing:antialiased}
 .language-switcher select{appearance:none;border:1px solid #d9e3d8;background:transparent;border-radius:999px;padding:7px 10px;color:inherit;font:inherit;font-size:12px;cursor:pointer}
+.studio-gallery-link{display:inline-flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap;padding:7px 0}.studio-gallery-link:hover{text-decoration:underline;text-underline-offset:4px}
 .home-page{--home-paper:#f6f5f1;--home-ink:#193d37;--home-muted:#596d65;--home-line:#d4dbd2;--home-accent:#bc643e;--home-serif:"Songti SC","STSong","Noto Serif CJK SC","PMingLiU",serif;--home-display:"Bodoni 72","Didot","Times New Roman",serif}
 button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
 button{cursor:pointer}button:disabled{cursor:not-allowed}button,input,textarea{font:inherit}
@@ -569,3 +570,7 @@ body:has(.bead-library-dialog) [data-slot=alert-dialog-overlay]{z-index:90}.cata
 .account-guest-note{font-size:12px;line-height:1.6;color:#77857d;text-align:center;margin:10px 8px 0}
 .account-profile{display:flex;flex-direction:column;gap:14px;overflow-wrap:anywhere}.account-profile p{font-size:14px;line-height:1.7;color:#64756b;margin:0}.account-profile strong{font-size:18px;color:#173c35}
 @media(max-width:480px){.account-card{padding:24px}.account-screen{padding:20px 12px}}
+
+/* Keep the English wordmark and longer control labels readable. */
+.atelier .brand b{font-size:21px;letter-spacing:-.5px}.atelier .brand small{font-size:10px;letter-spacing:1px}.atelier .navigation-tabs [data-slot=tabs-list]{gap:20px}.atelier .studio-tag{letter-spacing:0}.atelier .resize-trigger{white-space:normal;height:auto;min-height:40px;font-size:12px}.atelier .light-options button{min-width:0;padding-inline:4px}.atelier .light-options button span{white-space:normal}
+@media(max-width:720px){.atelier .brand b{font-size:18px}.atelier .brand-mark{width:32px;height:32px}.atelier .brand{gap:7px}.atelier .header-end{gap:6px}.atelier .navigation-tabs [data-slot=tabs-list]{gap:0}.atelier .brand small{display:none}.atelier .studio-gallery-link{font-size:12px;gap:3px}.atelier .header-end>.icon-button{width:28px}}

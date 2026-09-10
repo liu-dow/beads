@@ -70,8 +70,8 @@ test("deleting a used color replaces its cells and remaps higher indices",()=>{
 });
 test("save schema accepts old designs and dynamic material fields",()=>{
   const d=createDesign();assert.equal(designSchema.safeParse(d).success,true);
-  d.palette.push({id:"M",name:"自选珠",hex:"#aabbcc",finish:"matte",stock:21,sku:"品牌 / 001"});d.cells[0]=12;d.fit=DEFAULT_FIT;
-  const parsed=designSchema.parse(d);assert.equal(parsed.palette[12].sku,"品牌 / 001");assert.equal(parsed.fit.wrist,170);
+  d.palette.push({id:"M",name:"Custom bead",hex:"#aabbcc",finish:"matte",stock:21,sku:"Brand / 001"});d.cells[0]=12;d.fit=DEFAULT_FIT;
+  const parsed=designSchema.parse(d);assert.equal(parsed.palette[12].sku,"Brand / 001");assert.equal(parsed.fit.wrist,170);
 });
 test("new designs omit prices and legacy priced designs remain editable",()=>{
   const d=createDesign();

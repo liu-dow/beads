@@ -21,7 +21,7 @@ export function appOrigin(request: Request) {
 
 export function accountUser(user: User): AccountUser {
   const name = user.user_metadata?.full_name ?? user.user_metadata?.name;
-  return { id: user.id, email: user.email ?? "", displayName: typeof name === "string" && name.trim() ? name.trim().slice(0,80) : user.email?.split("@")[0] ?? "创作者" };
+  return { id: user.id, email: user.email ?? "", displayName: typeof name === "string" && name.trim() ? name.trim().slice(0,80) : user.email?.split("@")[0] ?? "Maker" };
 }
 
 export function createRequestClient(request: Request) {

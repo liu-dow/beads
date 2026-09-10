@@ -7,10 +7,10 @@ export function privateJson(body: unknown, status = 200) {
 export function rejectCrossSite(request: Request) {
   const origin = request.headers.get("origin");
   if (request.headers.get("sec-fetch-site") === "cross-site" || (origin && origin !== new URL(request.url).origin)) {
-    return privateJson({ error: "请在当前网站内操作。" }, 403);
+    return privateJson({ error: "Make this request from the current website." }, 403);
   }
   if (request.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !== "application/json") {
-    return privateJson({ error: "请求须使用 JSON 格式。" }, 415);
+    return privateJson({ error: "Use JSON for this request." }, 415);
   }
   return null;
 }
@@ -21,13 +21,13 @@ export async function authorizeApiRequest(request: Request) {
     if (response) return { response };
   }
   const context = createRequestClient(request);
-  if (!context) return { response: privateJson({ error: "账户服务暂未配置，请稍后再试。" }, 503) };
+  if (!context) return { response: privateJson({ error: "Account services are not configured yet. Please try again later." }, 503) };
   const { data, error } = await context.supabase.auth.getUser();
   if (error || !data.user || data.user.is_anonymous) {
     const unavailable = error && (error.status === undefined || error.status >= 500);
-    return { response: context.json({ error: unavailable ? "账户服务暂时不可用，请稍后重试。" : "请先登录后继续。", code: unavailable ? "AUTH_UNAVAILABLE" : "AUTH_REQUIRED" }, unavailable ? 503 : 401) };
+    return { response: context.json({ error: unavailable ? "Account services are temporarily unavailable. Please try again later." : "Sign in to continue.", code: unavailable ? "AUTH_UNAVAILABLE" : "AUTH_REQUIRED" }, unavailable ? 503 : 401) };
   }
   const expected = request.headers.get("x-bead-user");
-  if (expected && expected !== data.user.id) return { response: context.json({ error: "账户已切换，请重新打开工作台。", code: "ACCOUNT_CHANGED" }, 409) };
+  if (expected && expected !== data.user.id) return { response: context.json({ error: "Your account has changed. Reopen the studio.", code: "ACCOUNT_CHANGED" }, 409) };
   return { ...context, user: data.user };
 }

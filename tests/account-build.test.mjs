@@ -11,7 +11,7 @@ test("packages customer authentication and Supabase hosting configuration", asyn
 
   assert.match(workerSource, /SUPABASE_URL/);
   assert.match(workerSource, /SUPABASE_PUBLISHABLE_KEY/);
-  assert.match(workerSource, /账户服务暂未配置/);
+  assert.match(workerSource, /Account services are not configured/);
   assert.equal(hosting.d1, null);
   assert.equal(typeof hosting.project_id, "string");
   assert.ok(hosting.project_id.length > 0);

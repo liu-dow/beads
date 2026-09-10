@@ -20,7 +20,7 @@ export const BraceletScene=forwardRef<SceneHandle,Props>(function BraceletScene(
   const visualPalette=props.design.palette.map(p=>`${p.id}:${p.hex}:${p.finish}`).join("|");
   useImperativeHandle(ref,()=>({
     capture(width=2400,transparent=false){
-      const w=world.current;if(!w)throw new Error("3D 预览尚未准备好，请稍后重试。");
+      const w=world.current;if(!w)throw new Error("The 3D preview is not ready yet. Please try again shortly.");
       const {renderer,camera,scene,floor}=w;const size=renderer.getSize(new THREE.Vector2()),pixel=renderer.getPixelRatio(),aspect=camera.aspect,bg=scene.background,visible=floor.visible;
       try{renderer.setPixelRatio(1);renderer.setSize(width,Math.round(width*.75),false);camera.aspect=4/3;camera.updateProjectionMatrix();if(transparent){scene.background=null;floor.visible=false;}renderer.render(scene,camera);return renderer.domElement.toDataURL("image/png");}
       finally{scene.background=bg;floor.visible=visible;renderer.setPixelRatio(pixel);renderer.setSize(size.x,size.y,false);camera.aspect=aspect;camera.updateProjectionMatrix();renderer.render(scene,camera);}
@@ -32,7 +32,7 @@ export const BraceletScene=forwardRef<SceneHandle,Props>(function BraceletScene(
     const el=host.current;if(!el)return;let renderer:THREE.WebGLRenderer;
     try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:"high-performance"});}catch{setState("error");return;}
     renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
-    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.domElement.setAttribute("aria-label","可旋转和缩放的米珠手环三维预览");el.appendChild(renderer.domElement);
+    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.domElement.setAttribute("aria-label","Rotatable, zoomable 3D bead bracelet preview");el.appendChild(renderer.domElement);
     const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,.1,1000),controls=new OrbitControls(camera,renderer.domElement);
     controls.enableDamping=true;controls.dampingFactor=.065;controls.enablePan=true;controls.minDistance=35;controls.maxDistance=500;controls.maxPolarAngle=Math.PI*.86;controls.autoRotateSpeed=.65;
     const room=new RoomEnvironment();const pmrem=new THREE.PMREMGenerator(renderer);const environment=pmrem.fromScene(room,.035);scene.environment=environment.texture;room.dispose();pmrem.dispose();
@@ -119,5 +119,5 @@ export const BraceletScene=forwardRef<SceneHandle,Props>(function BraceletScene(
     else{w.key.color.set(0xfff4e5);w.key.intensity=3.1;w.key.position.set(-45,85,65);w.renderer.toneMappingExposure=1.1;}
     w.needsRender=true;
   },[props.light,props.background,state]);
-  return <div ref={host} className="scene-canvas">{state==="loading"&&<div className="scene-message"><LoaderCircle className="animate-spin"/><span>正在呈现每一颗珠子…</span></div>}{state==="error"&&<div className="scene-message"><Monitor/><b>3D 预览暂时不可用</b><span>请使用支持 WebGL 的浏览器，或切换到 2D 图纸继续设计。</span></div>}</div>;
+  return <div ref={host} className="scene-canvas">{state==="loading"&&<div className="scene-message"><LoaderCircle className="animate-spin"/><span>Rendering every bead…</span></div>}{state==="error"&&<div className="scene-message"><Monitor/><b>3D preview is unavailable</b><span>Use a browser with WebGL support, or continue designing in the 2D chart.</span></div>}</div>;
 });

@@ -13,14 +13,14 @@ const {createDesign}=await vite.ssrLoadModule("/lib/design.ts");
 const {guestStats,loadGuestDesigns,recordGuestExport,saveGuestDesign}=await vite.ssrLoadModule("/lib/guest-storage.ts");
 
 test("guest designs stay in browser storage and update in place",()=>{
-  const first=createDesign();first.title="游客作品";first.author="游客创作者";
+  const first=createDesign();first.title="Guest design";first.author="Guest creator";
   const saved=saveGuestDesign(first);
   assert.match(saved.id,/^[0-9a-f-]{36}$/i);
   assert.equal(loadGuestDesigns().length,1);
-  saved.title="更新后的游客作品";
+  saved.title="Updated guest design";
   saveGuestDesign(saved);
   assert.equal(loadGuestDesigns().length,1);
-  assert.equal(loadGuestDesigns()[0].title,"更新后的游客作品");
+  assert.equal(loadGuestDesigns()[0].title,"Updated guest design");
 });
 
 test("guest statistics use only local designs and export events",()=>{
@@ -29,7 +29,7 @@ test("guest statistics use only local designs and export events",()=>{
   assert.equal(stats.designs.count,1);
   assert.equal(stats.designs.beads,22*112);
   assert.deepEqual(stats.exports,[{format:"png",count:2},{format:"pdf",count:1}]);
-  assert.equal(stats.authors[0].name,"游客创作者");
+  assert.equal(stats.authors[0].name,"Guest creator");
 });
 
 test("invalid local records are ignored",()=>{

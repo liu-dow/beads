@@ -55,8 +55,8 @@ export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart
     if(y<el.scrollTop||y+stepY>el.scrollTop+el.clientHeight)el.scrollTop=Math.max(0,y-el.clientHeight/2);
   };
   return <div className={mini?"mini-pattern":"pattern-editor"}>
-    {!mini&&<div className="pattern-instruction"><span>{selection?`选区 ${selection.rows} 行 × ${selection.cols} 列`:"PEYOTE"}</span><span aria-live="off">{(activeCell>=0?activeCell:hover)>=0?`第 ${Math.floor((activeCell>=0?activeCell:hover)/design.cols)+1} 行 · 第 ${(activeCell>=0?activeCell:hover)%design.cols+1} 列`:`${design.rows} 行 × ${design.cols} 列`}</span></div>}
-    <div className="pattern-scroll" ref={scroll}><div className="pattern-canvas-stack"><canvas ref={canvas} tabIndex={mini?-1:0} aria-label="二维米珠图案编辑器" style={{cursor:tool==="pan"?"grab":tool==="move"?"move":"crosshair",touchAction:mini?"auto":"none"}}
+    {!mini&&<div className="pattern-instruction"><span>{selection?`Selection ${selection.rows} rows × ${selection.cols} columns`:"PEYOTE"}</span><span aria-live="off">{(activeCell>=0?activeCell:hover)>=0?`Column ${Math.floor((activeCell>=0?activeCell:hover)/design.cols)+1} rows · Column ${(activeCell>=0?activeCell:hover)%design.cols+1} columns`:`${design.rows} rows × ${design.cols} columns`}</span></div>}
+    <div className="pattern-scroll" ref={scroll}><div className="pattern-canvas-stack"><canvas ref={canvas} tabIndex={mini?-1:0} aria-label="2D bead pattern editor" style={{cursor:tool==="pan"?"grab":tool==="move"?"move":"crosshair",touchAction:mini?"auto":"none"}}
       onPointerDown={e=>{
         if(mini||e.button!==0)return;e.currentTarget.focus();const i=locate(e);last.current=-1;
         if(tool!=="pan"&&i<0)return;
