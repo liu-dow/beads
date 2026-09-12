@@ -1,0 +1,19 @@
+:root{
+  --atelier-paper:#f7f3ec;
+  --atelier-surface:#fffcf7;
+  --atelier-ink:#363d32;
+  --atelier-muted:#696a60;
+  --atelier-line:#ded8cb;
+  --atelier-clay:#94644f;
+  --atelier-olive:#48533e;
+  --atelier-serif:"Baskerville","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --background:#f7f3ec;--foreground:#363d32;
+  --primary:#48533e;--primary-foreground:#fffdf8;
+  --secondary:#efeae0;--secondary-foreground:#505744;
+  --muted:#efebe3;--muted-foreground:#696a60;
+  --accent:#eee5da;--accent-foreground:#664c3c;
+  --border:#ded8cb;--input:#d9d2c5;--ring:#927763;
+}
+body{background:var(--atelier-paper)}
+::selection{background:#e4cdbb;color:#363d32}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline-color:#94644f}

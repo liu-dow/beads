@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, RotateCcw, Type, Contrast, CheckCheck, Save, LoaderCircle } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, RotateCcw, Type, Contrast, CheckCheck } from "lucide-react";
 import type { Design } from "@/lib/design";
 import { patternSignature, readMakingProgress, type MakingProgress } from "@/lib/pattern-operations";
 import { useAccount } from "@/hooks/use-account";
@@ -11,14 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
-export default function MakingView({design,dirty,saving,onSave}:{design:Design;dirty:boolean;saving:boolean;onSave:()=>void}){
+export default function MakingView({design,dirty}:{design:Design;dirty:boolean}){
   const account=useAccount();
-  const isGuest=account?.guest===true;
+  // Unsaved patterns are immediately usable; only saved, unchanged account designs sync.
+  const localOnly=account?.guest!==false||!design.id||dirty;
   const signature=useMemo(()=>patternSignature(design),[design]);
-  if(!design.id||dirty)return <div className="making-start"><ListChecksIcon/><h2>Start making this pattern</h2><p>{isGuest?"Save this pattern to keep your making progress in this browser.":"Save this pattern to sync making progress with your design."}</p><Button onClick={onSave} disabled={saving}>{saving?<LoaderCircle className="animate-spin"/>:<Save/>}{saving?"Saving…":"Save pattern and start making"}</Button></div>;
-  return <MakingSession key={design.id+signature} design={design} signature={signature} storageKey={`bead-atelier:making:${account?.user.id??"local"}:${design.id}:${signature}`} guest={isGuest}/>;
+  const storageKey=`bead-atelier:making:${account?.user.id??"local"}:${design.id||"draft"}:${signature}`;
+  return <MakingSession key={`${storageKey}:${localOnly}`} design={design} signature={signature} storageKey={storageKey} guest={localOnly}/>;
 }
-function ListChecksIcon(){return <CheckCheck size={32}/>;}
 function MakingSession({design,signature,storageKey,guest}:{design:Design;signature:string;storageKey:string;guest:boolean}){
   const account=useAccount(),request=account?.apiFetch??fetch;
   const [session,setSession]=useState(()=>{

@@ -10,6 +10,20 @@ const {createDesign}=await vite.ssrLoadModule("/lib/design.ts");
 const {MaterialsEditor,MaterialList}=await vite.ssrLoadModule("/components/material-settings.tsx");
 const noop=()=>{};
 
+test("making opens current unsaved and modified designs without a save gate",async()=>{
+  const {default:MakingView}=await vite.ssrLoadModule("/components/making-view.tsx");
+  for(const id of ["","existing-design"]){
+    const design={...createDesign(),id};
+    const html=renderToStaticMarkup(React.createElement(MakingView,{design,dirty:true}));
+    assert.match(html,/aria-label="Making mode"/);
+    assert.match(html,/Column 1/);
+    assert.match(html,/Complete column and continue/);
+    assert.match(html,/Making progress saved in this browser/);
+    assert.doesNotMatch(html,/Save pattern and start making|Restoring making progress/);
+    assert.equal(design.id,id);
+  }
+});
+
 test("material settings retain inventory without pricing controls or totals",()=>{
   const design=createDesign();
   const editor=renderToStaticMarkup(React.createElement(MaterialsEditor,{design,selected:1,onSelect:noop,change:noop,onPaletteStructure:noop,showStock:true}));

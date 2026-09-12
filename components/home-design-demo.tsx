@@ -1,7 +1,7 @@
 "use client";
 import { Component, Suspense, lazy, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Box, Grid2X2 } from "lucide-react";
+import { ArrowUpRight, Box, ImageIcon, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -14,7 +14,7 @@ const Scene = lazy(() => import("./bracelet-scene").then(module => ({ default: m
 class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? <p className={styles.demoLoading} role="status">3D could not load. You can still explore the pattern view.</p> : this.props.children; }
+  render() { return this.state.failed ? <p className={styles.demoLoading} role="status">3D could not load. Select Preview to explore the colours, or continue in the studio.</p> : this.props.children; }
 }
 
 export function HomeDesignDemo({ works }: { works: PublicWork[] }) {
@@ -23,16 +23,16 @@ export function HomeDesignDemo({ works }: { works: PublicWork[] }) {
   const design = useMemo(() => workDesign(work, palette), [work, palette]);
   const colors = workPalette(coloredWork(work, palette));
   return <div className={styles.demo}>
-    <div className={styles.demoBar}><span><i/>THE COLOUR STUDIO</span><Select value={slug} onValueChange={setSlug}><SelectTrigger aria-label="Demo pattern"><SelectValue/></SelectTrigger><SelectContent>{works.map(work => <SelectItem key={work.slug} value={work.slug}>{work.title}</SelectItem>)}</SelectContent></Select></div>
+    <div className={styles.demoBar}><span><i/>TRY IT. MAKE IT YOURS.</span><Select value={slug} onValueChange={setSlug}><SelectTrigger aria-label="Demo pattern"><SelectValue/></SelectTrigger><SelectContent>{works.map(work => <SelectItem key={work.slug} value={work.slug}>{work.title}</SelectItem>)}</SelectContent></Select></div>
     <Tabs value={view} onValueChange={setView} className={styles.demoViewport}>
-      <div className={styles.demoViewSwitch}><TabsList aria-label="Preview format"><TabsTrigger value="pattern"><Grid2X2 size={15}/>Pattern</TabsTrigger><TabsTrigger value="3d"><Box size={15}/>3D bracelet</TabsTrigger></TabsList></div>
-      <TabsContent value="pattern" className={styles.demoPanel}><img src={workPreviewUrl(work, palette)} alt={`${work.title} in the ${palette} palette — rendered bead bracelet`} width={1200} height={960} loading="lazy"/></TabsContent>
-      <TabsContent value="3d" className={styles.demoPanel}><SceneBoundary><Suspense fallback={<p className={styles.demoLoading} role="status">Opening the 3D studio…</p>}><Scene design={design} shape="ring" light="studio" background="#e5e9df" rotate={false} editing={false} onPaint={() => {}}/></Suspense></SceneBoundary></TabsContent>
-      <span className={styles.demoCaption}>{view === "3d" ? "Drag to rotate · Digital simulation" : "An actual editable pattern"}</span>
+      <div className={styles.demoViewSwitch}><TabsList aria-label="Preview format"><TabsTrigger value="pattern"><ImageIcon size={15}/>Preview</TabsTrigger><TabsTrigger value="3d"><Box size={15}/>Rotate in 3D</TabsTrigger></TabsList></div>
+      <TabsContent value="pattern" className={styles.demoPanel}><img src={workPreviewUrl(work, palette)} alt={`${work.title} in the ${palette} palette — rendered bead bracelet`} width={1200} height={960} loading="eager" fetchPriority="high"/></TabsContent>
+      <TabsContent value="3d" className={styles.demoPanel}><SceneBoundary><Suspense fallback={<p className={styles.demoLoading} role="status">Opening the 3D studio…</p>}><Scene design={design} shape="ring" light="studio" background="#ede8de" rotate={false} editing={false} onPaint={() => {}}/></Suspense></SceneBoundary></TabsContent>
+      <span className={styles.demoCaption}>{view === "3d" ? "Drag to rotate · Digital simulation" : "Your colours. An actual editable pattern."}</span>
     </Tabs>
-    <div className={styles.demoPalette}><div><span>Pick your palette</span><small>{colors.length} colours · {work.rows} × {work.cols} beads</small></div>
+    <div className={styles.demoPalette}><div><span>One pattern. Your kind of colour.</span><button className={styles.demoReset} type="button" disabled={palette === "original"} onClick={() => setPalette("original")} aria-label="Reset preview palette"><RotateCcw size={13}/>Reset</button></div>
       <RadioGroup aria-label="Demo colour palette" value={palette} onValueChange={value => { const next = colorwayId(value); setPalette(next); trackConversion("palette_changed", { design: work.slug, palette: next }); }} className={styles.demoPaletteOptions}>{COLORWAYS.map(option => <label key={option.id} className={palette === option.id ? styles.paletteSelected : ""}><RadioGroupItem value={option.id}/><span className={styles.demoSwatches} aria-hidden="true">{[0, 1, 3, 4].map(index => <i key={index} style={{ background: (option.id === "original" ? work.colors : option.colors)[index][1] }}/>)}</span><span>{option.name}</span></label>)}</RadioGroup>
-      <div className={styles.demoBottom}><span role="status">{COLORWAYS.find(option => option.id === palette)!.name}. A little more you.</span><Button asChild className={styles.primaryCta}><Link href={studioUrl(work, palette)}>Make this mine <ArrowUpRight size={16}/></Link></Button></div>
+      <div className={styles.demoBottom}><span role="status"><b>{COLORWAYS.find(option => option.id === palette)!.name} palette</b><small>{colors.length} colours · Your own editable copy</small></span><Button asChild className={styles.primaryCta}><Link href={studioUrl(work, palette)}>Continue with this design <ArrowUpRight size={16}/></Link></Button></div>
     </div>
   </div>;
 }

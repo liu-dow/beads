@@ -111,3 +111,37 @@ test("local previews omit canonical and schema URLs and stay out of the index", 
     assert.equal(data.url, undefined);
   } finally { globalThis.__beadsHomepageEnv.APP_ORIGIN = configuredOrigin; }
 });
+
+test("first-screen experience explains the product and offers a real editable preview", () => {
+  const html = render();
+  const hero = html.slice(html.indexOf('<section'), html.indexOf('</section>'));
+  assert.match(hero, /<h1[^>]*>Design a bead bracelet/);
+  assert.match(hero, /FREE PEYOTE BRACELET PATTERN MAKER/);
+  assert.match(hero, /id="try-it"/);
+  assert.match(hero, /aria-label="Demo colour palette"/);
+  assert.match(hero, /Continue with this design/);
+  assert.match(hero, /loading="eager"/);
+  assert.match(hero, /fetchPriority="high"/);
+  assert.match(hero, /No account needed/);
+  assert.match(hero, /aria-label="Reset preview palette"/);
+});
+
+test("all FAQ answers are server-rendered and disclosure works without JavaScript", () => {
+  const html = render();
+  assert.equal((html.match(/<details\b/g) || []).length, HOME_FAQS.length);
+  for (const faq of HOME_FAQS) {
+    // React escapes apostrophes and other text characters in HTML.
+    const answer = renderToStaticMarkup(React.createElement('p', null, faq.answer));
+    assert.ok(html.includes(answer), faq.question);
+  }
+  assert.match(html, /no save required/);
+  assert.match(html, /do not sync across devices/);
+});
+
+test("homepage social sharing uses an actual public pattern image", () => {
+  const metadata = generateMetadata();
+  assert.equal(metadata.twitter.card, 'summary_large_image');
+  assert.equal(metadata.openGraph.images[0].url, configuredOrigin + '/patterns/tidal-rhythm.png');
+  assert.equal(metadata.openGraph.images[0].width, 1200);
+  assert.equal(metadata.openGraph.images[0].height, 960);
+});

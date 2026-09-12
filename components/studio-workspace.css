@@ -155,3 +155,64 @@
   .design-workspace.immersive .mode-split .split-panels{height:760px!important}
 }
 @media(prefers-reduced-motion:reduce){.design-workspace .studio-inspiration>summary>svg:last-child{transition:none}}
+
+/* The same paper, clay and olive identity, with neutral surfaces for colour work. */
+.design-workspace{--workspace-ink:var(--atelier-ink);--workspace-muted:var(--atelier-muted);background:var(--atelier-paper);color:var(--atelier-ink)}
+.design-workspace .app-header{background:#fffcf7;border-color:#dfd8cb}
+.design-workspace .brand-mark{background:transparent;color:var(--atelier-clay);border-radius:0}
+.design-workspace .brand b{font-family:var(--atelier-serif);font-size:24px;font-weight:400;letter-spacing:-.6px}
+.design-workspace .brand-dot{color:var(--atelier-clay)}
+.design-workspace .navigation-tabs [data-slot=tabs-trigger]{color:#747368}
+.design-workspace .navigation-tabs [data-slot=tabs-trigger][data-state=active]{color:#48533e}
+.design-workspace .navigation-tabs [data-slot=tabs-trigger]:after{background:#a1795e!important;height:2px!important}
+.design-workspace .avatar{background:#eee9df;border-color:#dfd5c6;color:#71644f}
+.design-workspace .project-title h1{font-family:var(--atelier-serif);font-size:28px;font-weight:400;letter-spacing:-.5px}
+.design-workspace .project-actions .save-primary{background:var(--atelier-olive);border-color:var(--atelier-olive);color:#fffaf2;box-shadow:0 2px 6px #514d3714}
+.design-workspace .project-actions .save-primary:hover{background:#36412e}
+.design-workspace .project-actions [data-slot=button]{border-radius:5px}
+.design-workspace .studio-recovery,.design-workspace .studio-inspiration{background:#f9f5ed;border-color:#e0d8ca;color:#685e4c}
+.design-workspace .studio-recovery button{background:#eee5d8;color:#6c523c}
+.design-workspace .studio-recovery p,.design-workspace .studio-recovery button[data-variant=ghost]{color:#766d5b}
+.design-workspace .studio-inspiration>summary{color:#88654d}
+.design-workspace .studio-inspiration .studio-start{border-color:#e0d8ca}
+.design-workspace .panel,.design-workspace .work-surface{border-color:#ddd5c8;border-radius:8px;box-shadow:0 3px 10px #4d452d08}
+.design-workspace .left-panel{background:#fffcf7}
+.design-workspace .panel-heading{font-family:var(--atelier-serif);font-size:19px;font-weight:400;border-color:#e9dfd2;color:#514c3f}
+.design-workspace .count-badge{font-family:var(--font-sans);font-size:10px;background:#f0e9de;color:#82725b;border-radius:3px}
+.design-workspace .palette-guidance,.design-workspace .palette-tip{color:#736e60}
+.design-workspace .palette-tip,.design-workspace .material-details{border-color:#e3dace}
+.design-workspace .material-details>summary{color:#77624d;font-size:12px}
+.design-workspace .swatch small{color:#746e61}
+.design-workspace .swatch.selected small{color:#805337}
+.design-workspace .swatch.selected .color-chip:after{border-color:#9b7253}
+.design-workspace .selected-material{background:#f1e9dc;border-color:#ddd0be;border-radius:5px}
+.design-workspace .selected-material small{color:#7b6b57}
+.design-workspace .selected-material b{color:#554b3d}
+.design-workspace .bead-library-trigger{background:#fffcf7;border-color:#d9ccba;color:#725d45;border-radius:5px}
+.design-workspace .viewport-toolbar{background:#fffcf7;border-color:#e5dccf}
+.design-workspace .view-tabs{background:#f1ece3}
+.design-workspace .view-tabs [data-slot=tabs-trigger][data-state=active]{background:#fffdf9;color:#644f3c;box-shadow:0 1px 3px #65563b17}
+.design-workspace .workspace-panel-toggle{color:#736a59}
+.design-workspace .desktop-tools{background:#fffdf9;border-color:#e0d8ca}
+.design-workspace .editor-tool{color:#696a5d}
+.design-workspace .editor-tool.is-active{background:#efe3d5;color:#784e35;box-shadow:inset 0 0 0 1px #c8ab8d}
+.design-workspace .active-color-tool{background:#fffaf2;border-color:#d7cbbb}
+.design-workspace .compact-history{border-color:#e2d8cb}
+.design-workspace .more-tools-trigger{color:#726a5a}
+.design-workspace .two-toolbar{background:#faf6ee;border-color:#e5ddcf;color:#544d3f}
+.design-workspace .two-toolbar small{color:#87745f}
+.design-workspace .two-stage{background:#fffdf8}
+.design-workspace .pattern-instruction{color:#807562}
+.design-workspace .chart-size-trigger{background:#fffcf5;border-color:#d8ccb9;color:#766047;border-radius:5px}
+.design-workspace .pattern-scroll{border-color:#dfd7c9;background:#fff}
+.design-workspace .chart-navigation{background:#f5efe4;border-color:#dfd2bf;color:#726249;border-radius:5px}
+.design-workspace .chart-navigation-controls button{color:#7d6449;border-color:#d3c4ae;background:#fffcf6}
+.design-workspace .chart-navigation-controls input{accent-color:#947254}
+.design-workspace .preview-heading{color:#655f4f}
+.design-workspace .preview-heading i{background:#8b9062}
+.design-workspace .view-dock{background:#fffaf0ed;border-color:#f9f2e7;box-shadow:0 4px 14px #61584112}
+.design-workspace .view-dock [data-slot=tabs-list]{background:#ede9dc}
+.design-workspace .viewport-status{background:#fffcf7;border-color:#e5ddcf;color:#77735f}
+.design-workspace .viewport-status .inline-switch label{color:#746b59}
+.design-workspace .app-footer{color:#82745f}
+@media(max-width:767px){.design-workspace .brand b{font-size:22px}.design-workspace .project-title h1{font-size:25px}.design-workspace .compact-tools{background:#fffcf7;border-color:#d9cdbb}.design-workspace .byline{color:#716c5d}}

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowUpRight, Gem } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { AtelierMark } from "./atelier-mark";
 import { Button } from "@/components/ui/button";
 import type { ReactNode } from "react";
 
@@ -7,7 +8,7 @@ export function PortfolioShell({ children }: { children: ReactNode }) {
   return <div className="portfolio-site" lang="en" data-native-english>
     <a className="portfolio-skip" href="#portfolio-main">Skip to content</a>
     <header className="portfolio-nav">
-      <Link className="portfolio-brand" href="/" aria-label="Bead Atelier home"><Gem size={29} strokeWidth={1.2} /><span>BEAD ATELIER<small>THE ART OF LITTLE THINGS</small></span></Link>
+      <Link className="portfolio-brand" href="/" aria-label="Bead Atelier home"><AtelierMark/><span>Bead Atelier<small>THE ART OF LITTLE THINGS</small></span></Link>
       <nav aria-label="Main navigation"><Link className="portfolio-home-link" href="/">Home</Link><Link href="/portfolio" aria-current="page">Gallery</Link><Button asChild className="portfolio-create"><Link href="/studio">Start designing <ArrowUpRight size={16} /></Link></Button></nav>
     </header>
     {children}

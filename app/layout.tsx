@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./atelier-theme.css";
 
 export const metadata: Metadata = {
   title: "Bead Atelier · Beadwork design studio",
