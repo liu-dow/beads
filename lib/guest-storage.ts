@@ -11,15 +11,16 @@ function storage() {
   return window.localStorage;
 }
 
-export function loadGuestDesigns(): Design[] {
+export function loadGuestDesigns(strict = false): Design[] {
   try {
     const value: unknown = JSON.parse(storage().getItem(DESIGNS_KEY) ?? "[]");
-    if (!Array.isArray(value)) return [];
+    if (!Array.isArray(value)) throw new Error("Invalid saved collection.");
     return value.flatMap(item => {
       const parsed = designSchema.safeParse(item);
+      if (strict && (!parsed.success || !parsed.data.id)) throw new Error("Invalid saved design.");
       return parsed.success && parsed.data.id ? [parsed.data] : [];
     }).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).slice(0,100);
-  } catch { return []; }
+  } catch { if (strict) throw new Error("Your saved collection could not be read. It has been left unchanged."); return []; }
 }
 
 export function saveGuestDesign(design: Design) {
@@ -27,7 +28,7 @@ export function saveGuestDesign(design: Design) {
   const saved = { ...design, id: design.id || crypto.randomUUID(), createdAt: design.id ? design.createdAt : now, updatedAt: now };
   const parsed = designSchema.safeParse(saved);
   if (!parsed.success) throw new Error("Check the title, author, and pattern dimensions.");
-  const designs = loadGuestDesigns().filter(item=>item.id!==saved.id);
+  const designs = loadGuestDesigns(true).filter(item=>item.id!==saved.id);
   storage().setItem(DESIGNS_KEY, JSON.stringify([parsed.data,...designs].slice(0,100)));
   return parsed.data;
 }

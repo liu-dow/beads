@@ -158,7 +158,7 @@ main{padding:0 30px}
 .mini-pattern .pattern-scroll{overflow:hidden}
 .workspace-note{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#a3af97;gap:8px;padding:11px 19px}
 .workspace-note>span:first-child{display:flex;gap:6px;align-items:center}
-.two-stage{min-height:465px;flex-direction:column;background:#f8faf5}
+.two-stage{display:flex;min-height:465px;flex-direction:column;background:#f8faf5}
 .two-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 17px;border-bottom:1px solid #e7eddf;font-size:12px;color:#7c8f6e}
 .two-toolbar>span,.two-toolbar>div{display:flex;align-items:center;gap:8px}
 .pattern-editor{padding:0 17px;display:flex;flex-direction:column;flex:1;min-width:0}
@@ -372,6 +372,15 @@ main{padding:0 30px}
 .pattern-editor{min-height:0;padding:0 10px 10px}
 .pattern-instruction{gap:6px;min-height:20px;margin:10px 0;font-size:12px;flex-wrap:wrap}
 .pattern-editor .pattern-scroll{min-height:0;max-height:none;flex:1;scrollbar-gutter:stable;border-radius:4px}
+.chart-size-trigger{height:30px;font-size:12px;gap:6px;color:#275c49;border-color:#c6d6c9;background:#f6faf5}
+.chart-navigation{flex-shrink:0;margin-top:8px;padding:8px 10px;background:#edf4ed;border:1px solid #cfdece;border-radius:6px;color:#365f4c}
+.chart-navigation-hint{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:11px}
+.chart-navigation-hint>span:first-child{display:flex;align-items:center;gap:6px}
+.chart-navigation-controls{display:flex;align-items:center;gap:12px;margin-top:6px}
+.chart-navigation-controls button{display:grid;place-items:center;flex-shrink:0;width:36px;height:36px;border:1px solid #b9cebd;border-radius:5px;background:#fff;color:#285941;cursor:pointer}
+.chart-navigation-controls button:disabled{opacity:.35;cursor:default}
+.chart-navigation-controls input{flex:1;min-width:0;height:32px;accent-color:#38765b;cursor:ew-resize;touch-action:pan-y}
+.chart-navigation-controls :focus-visible{outline:2px solid #38765b;outline-offset:2px}
 .bead-library-trigger{width:100%;margin:0 0 16px;justify-content:flex-start;gap:9px;font-size:14px;background:#f5f9f7;border-color:#c4d7cd}
 .catalog-material-label{display:flex;gap:5px;align-items:flex-start;color:#306658;font-size:12px;line-height:1.6;margin:-2px 0 12px;overflow-wrap:anywhere}
 .catalog-material-label svg{flex-shrink:0;margin-top:3px}

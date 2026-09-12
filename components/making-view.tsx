@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
-export default function MakingView({design,dirty,saving,onSave}:{design:Design;dirty:boolean;saving:boolean;onSave:()=>Promise<void>}){
+export default function MakingView({design,dirty,saving,onSave}:{design:Design;dirty:boolean;saving:boolean;onSave:()=>void}){
   const account=useAccount();
   const isGuest=account?.guest===true;
   const signature=useMemo(()=>patternSignature(design),[design]);

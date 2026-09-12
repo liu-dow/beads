@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight, MoveHorizontal } from "lucide-react";
 import type { Design } from "@/lib/design";
 import { drawPattern } from "@/lib/pattern-draw";
 import { clampSelection, contains, selectBetween, type Selection, type PatternClip } from "@/lib/pattern-operations";
@@ -8,13 +9,23 @@ type Props={
   design:Design;zoom:number;symbols:boolean;onPaint:(i:number)=>void;onStrokeStart:()=>void;onPick?:(i:number)=>void;tool:string;mini?:boolean;
   selection?:Selection|null;onSelection?:(s:Selection|null)=>void;onMove?:(row:number,col:number)=>void;
   clipboard?:PatternClip|null;onPaste?:(row:number,col:number)=>void;activeCell?:number;onHover?:(i:number)=>void;highlightColor?:number;
+  sizeControl?:React.ReactNode;
 };
 
-export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart,onPick,tool,mini=false,selection,onSelection,onMove,clipboard,onPaste,activeCell=-1,onHover,highlightColor}:Props){
+export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart,onPick,tool,mini=false,selection,onSelection,onMove,clipboard,onPaste,activeCell=-1,onHover,highlightColor,sizeControl}:Props){
   const canvas=useRef<HTMLCanvasElement>(null),overlay=useRef<HTMLCanvasElement>(null),scroll=useRef<HTMLDivElement>(null);
   const drag=useRef<{index:number;x:number;y:number;selection?:Selection}|null>(null),last=useRef(-1);
   const [focus,setFocus]=useState(-1),[hover,setHover]=useState(-1),[preview,setPreview]=useState<Selection|null>(null);
   const cell=mini?7:20*zoom,pad=mini?8:34,stepY=cell*.88;
+  const [navigation,setNavigation]=useState({left:0,max:0,width:0});
+  useEffect(()=>{
+    const el=scroll.current,content=canvas.current;if(mini||!el||!content)return;
+    const update=()=>setNavigation({left:el.scrollLeft,max:Math.max(0,el.scrollWidth-el.clientWidth),width:el.clientWidth});
+    const observer=new ResizeObserver(update);observer.observe(el);observer.observe(content);
+    el.addEventListener("scroll",update,{passive:true});update();
+    return()=>{observer.disconnect();el.removeEventListener("scroll",update);};
+  },[mini,zoom,design.rows,design.cols]);
+  const scrollPage=(direction:number)=>scroll.current?.scrollBy({left:direction*Math.max(cell,navigation.width*.75),behavior:"smooth"});
   useEffect(()=>{if(canvas.current)drawPattern(canvas.current,design,{cell,symbols,rulers:!mini,flat:!mini,highlightColor:mini?undefined:highlightColor});},[design,cell,symbols,mini,highlightColor]);
   useEffect(()=>{
     const c=overlay.current,base=canvas.current;if(!c||!base||mini)return;
@@ -55,7 +66,7 @@ export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart
     if(y<el.scrollTop||y+stepY>el.scrollTop+el.clientHeight)el.scrollTop=Math.max(0,y-el.clientHeight/2);
   };
   return <div className={mini?"mini-pattern":"pattern-editor"}>
-    {!mini&&<div className="pattern-instruction"><span>{selection?`Selection ${selection.rows} rows × ${selection.cols} columns`:"PEYOTE"}</span><span aria-live="off">{(activeCell>=0?activeCell:hover)>=0?`Column ${Math.floor((activeCell>=0?activeCell:hover)/design.cols)+1} rows · Column ${(activeCell>=0?activeCell:hover)%design.cols+1} columns`:`${design.rows} rows × ${design.cols} columns`}</span></div>}
+    {!mini&&<div className="pattern-instruction"><span>{selection?`Selection ${selection.rows} rows × ${selection.cols} columns`:(activeCell>=0?activeCell:hover)>=0?`Row ${Math.floor((activeCell>=0?activeCell:hover)/design.cols)+1} · Column ${(activeCell>=0?activeCell:hover)%design.cols+1}`:"PEYOTE"}</span>{sizeControl??<span>{design.rows} rows × {design.cols} columns</span>}</div>}
     <div className="pattern-scroll" ref={scroll}><div className="pattern-canvas-stack"><canvas ref={canvas} tabIndex={mini?-1:0} aria-label="2D bead pattern editor" style={{cursor:tool==="pan"?"grab":tool==="move"?"move":"crosshair",touchAction:mini?"auto":"none"}}
       onPointerDown={e=>{
         if(mini||e.button!==0)return;e.currentTarget.focus();const i=locate(e);last.current=-1;
@@ -101,5 +112,9 @@ export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart
         setFocus(n);setHover(n);onHover?.(n);ensureVisible(n);
       }}
     /><canvas ref={overlay} className="pattern-overlay" aria-hidden="true"/></div></div>
+    {!mini&&navigation.max>0&&<div className="chart-navigation" aria-label="Chart horizontal navigation">
+      <div className="chart-navigation-hint"><span><MoveHorizontal size={15}/>Slide to explore the chart</span><span>Columns {Math.max(1,Math.floor((navigation.left-pad)/cell)+1)}–{Math.min(design.cols,Math.ceil((navigation.left+navigation.width-pad)/cell))} / {design.cols}</span></div>
+      <div className="chart-navigation-controls"><button type="button" aria-label="Scroll chart left" disabled={navigation.left<=1} onClick={()=>scrollPage(-1)}><ArrowLeft size={18}/></button><input type="range" aria-label="Horizontal chart position" min={0} max={navigation.max} value={navigation.left} onChange={e=>{if(scroll.current)scroll.current.scrollLeft=Number(e.target.value);}}/><button type="button" aria-label="Scroll chart right" disabled={navigation.left>=navigation.max-1} onClick={()=>scrollPage(1)}><ArrowRight size={18}/></button></div>
+    </div>}
   </div>;
 }

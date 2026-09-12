@@ -12,14 +12,23 @@ const noop=()=>{};
 
 test("material settings retain inventory without pricing controls or totals",()=>{
   const design=createDesign();
-  const editor=renderToStaticMarkup(React.createElement(MaterialsEditor,{design,selected:1,onSelect:noop,change:noop,onPaletteStructure:noop}));
-  const list=renderToStaticMarkup(React.createElement(MaterialList,{design,onSelect:noop}));
+  const editor=renderToStaticMarkup(React.createElement(MaterialsEditor,{design,selected:1,onSelect:noop,change:noop,onPaletteStructure:noop,showStock:true}));
+  const list=renderToStaticMarkup(React.createElement(MaterialList,{design,onSelect:noop,showStock:true}));
   assert.match(editor,/Stock \/ beads/);
   assert.match(editor,/Brand \/ physical code/);
   assert.match(list,/Qty/);
   assert.match(list,/With reserve/);
   assert.match(list,/To buy/);
   assert.doesNotMatch(editor+list,/Unit price|Estimated cost|[¥￥]/i);
+});
+
+test("guest materials hide inventory even when a saved design contains stock",()=>{
+  const design=createDesign();design.palette[1].stock=100;
+  const editor=renderToStaticMarkup(React.createElement(MaterialsEditor,{design,selected:1,onSelect:noop,change:noop,onPaletteStructure:noop}));
+  const list=renderToStaticMarkup(React.createElement(MaterialList,{design,onSelect:noop}));
+  assert.doesNotMatch(editor+list,/Stock|To buy/);
+  assert.match(list,/With reserve/);
+  assert.equal(design.palette[1].stock,100);
 });
 
 test("studio removes reference galleries while retaining the user's collection",async()=>{

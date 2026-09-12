@@ -56,7 +56,7 @@ test("production SEO uses a configured origin and keeps previews and search out 
 test("gallery cards render crawlable titles and image URLs without client JavaScript",async()=>{
   const { WorkCard }=await vite.ssrLoadModule("/components/portfolio-card.tsx");
   const html=renderToStaticMarkup(React.createElement(WorkCard,{work:PUBLIC_WORKS[0]}));
-  assert.match(html,/href="\/portfolio\/tidal-rhythm"/);assert.match(html,/Tidal Rhythm/);assert.match(html,/\/api\/portfolio\/tidal-rhythm\/image/);assert.doesNotMatch(html,/\p{Script=Han}/u);
+  assert.match(html,/href="\/portfolio\/tidal-rhythm"/);assert.match(html,/Tidal Rhythm/);assert.match(html,/\/patterns\/tidal-rhythm\.webp\?v=\d+/);assert.doesNotMatch(html,/\p{Script=Han}/u);
   assert.match(html,/href="\/studio\?design=tidal-rhythm"/);
 });
 
@@ -72,6 +72,28 @@ test("every palette preview carries the same pattern and colours into an indepen
     copy.palette[0].hex="#ff0000";assert.notEqual(workDesign(work,variant.id).palette[0].hex,"#ff0000");
   }
   for(const value of [undefined,null,"bad",["rosewood"],"<script>"])assert.equal(colorwayId(value),"original");
+});
+
+test("material renders preserve every bead and palette index and remain deterministic",()=>{
+  for(const work of PUBLIC_WORKS)for(const variant of COLORWAYS){
+    const colored=coloredWork(work,variant.id),design=workDesign(colored),svg=patternSvg(colored);
+    const cells=[...svg.matchAll(/data-cell="(\d+)" data-palette="(\d+)"/g)];
+    assert.equal(cells.length,design.cells.length);
+    assert.equal(new Set(cells.map(cell=>cell[1])).size,design.cells.length);
+    for(const [,index,palette] of cells)assert.equal(Number(palette),design.cells[Number(index)]);
+    assert.doesNotMatch(svg,/NaN|Infinity|undefined|<image\b|<script\b/);
+    assert.equal(svg,patternSvg(colored));
+  }
+});
+
+test("preview URLs invalidate old images and retain palette selections",async()=>{
+  const {workPreviewUrl,PATTERN_PREVIEW_VERSION}=await vite.ssrLoadModule("/lib/portfolio.ts");
+  for(const variant of COLORWAYS){
+    const url=new URL(workPreviewUrl(PUBLIC_WORKS[0],variant.id),"https://test.invalid");
+    assert.equal(url.searchParams.get("v"),PATTERN_PREVIEW_VERSION);
+    if(variant.id==="original")assert.equal(url.pathname,"/patterns/tidal-rhythm.webp");
+    else {assert.equal(url.pathname,"/api/portfolio/tidal-rhythm/image");assert.equal(url.searchParams.get("palette"),variant.id);}
+  }
 });
 
 test("topic collections link only to existing patterns and social previews have the expected dimensions",async()=>{

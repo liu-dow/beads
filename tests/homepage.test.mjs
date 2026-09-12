@@ -66,7 +66,7 @@ test("featured examples and the demo expose valid pattern and edit links without
   assert.ok(links.includes("/patterns/first-peyote-pattern"));
   assert.match(html, /aria-label="Demo pattern"/);
   assert.match(html, /aria-label="Demo colour palette"/);
-  assert.match(html, /alt="[^"]+live pattern preview"/);
+  assert.match(html, /alt="[^"]+rendered bead bracelet"/);
   assert.doesNotMatch(html, /<canvas\b/, "initial rendering does not depend on WebGL");
 });
 
@@ -82,7 +82,8 @@ test("server-rendered content explains the workflow and provides concrete materi
   assert.match(html, /Digital illustration/, "inspiration artwork is not presented as an actual product photograph");
   assert.match(html, /Save in this browser/);
   assert.ok(HOME_FAQS.some(item => /do not sync across devices/.test(item.answer)));
-  assert.ok(HOME_FAQS.some(item => /Exports are not editable project backups/.test(item.answer)));
+  assert.ok(HOME_FAQS.some(item => /are not editable project backups/.test(item.answer)));
+  assert.ok(HOME_FAQS.some(item => /automatically kept as drafts in this browser/.test(item.answer)));
 });
 
 test("public homepage metadata and application schema agree on the configured origin and free offer", () => {

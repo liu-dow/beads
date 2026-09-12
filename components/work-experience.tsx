@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PortfolioShare } from "./portfolio-share";
-import { COLORWAYS, coloredWork, colorwayId, studioUrl, workDesign, workPalette, type ColorwayId, type PublicWork } from "@/lib/portfolio";
+import { COLORWAYS, coloredWork, colorwayId, studioUrl, workDesign, workPalette, workPreviewUrl, PATTERN_PREVIEW_VERSION, type ColorwayId, type PublicWork } from "@/lib/portfolio";
 import { dimensions } from "@/lib/design";
 import type { SceneHandle } from "./bracelet-scene";
 import { trackConversion } from "@/lib/conversion-events";
@@ -27,7 +27,7 @@ export function WorkExperience({ work, initialPalette = "original" }: { work: Pu
   const current = useMemo(() => coloredWork(work, palette), [work, palette]);
   const design = useMemo(() => workDesign(current), [current]);
   const colors = useMemo(() => workPalette(current), [current]);
-  const size = dimensions(design), imagePath = `/api/portfolio/${work.slug}/image?palette=${palette}`;
+  const size = dimensions(design), imagePath = `/api/portfolio/${work.slug}/image?palette=${palette}&v=${PATTERN_PREVIEW_VERSION}`;
   const path = `/portfolio/${work.slug}${palette === "original" ? "" : `?palette=${palette}`}`;
   const choosePalette = (value: string) => {
     const next = colorwayId(value);
@@ -61,10 +61,10 @@ export function WorkExperience({ work, initialPalette = "original" }: { work: Pu
     <div className="portfolio-detail">
       <figure className="portfolio-detail-image">
         <div className="portfolio-preview-frame">
-          {view === "pattern" ? <img src={palette === "original" ? `/patterns/${work.slug}.webp` : imagePath} alt={`${work.title} bead pattern in ${colors.slice(0, 3).map(color => color.name.toLowerCase()).join(", ")}`} width={900} height={720} fetchPriority="high"/> : <PreviewBoundary><Suspense fallback={<p className="portfolio-preview-message" role="status">Preparing the 3D preview…</p>}><Preview3D ref={scene} design={design} shape="ring" light="studio" background={work.background} rotate={false} editing={false} onPaint={() => {}} onReady={setReady}/></Suspense></PreviewBoundary>}
+          {view === "pattern" ? <img src={workPreviewUrl(work, palette)} alt={`${work.title} rendered bead bracelet in ${colors.slice(0, 3).map(color => color.name.toLowerCase()).join(", ")}`} width={1200} height={960} fetchPriority="high"/> : <PreviewBoundary><Suspense fallback={<p className="portfolio-preview-message" role="status">Preparing the 3D preview…</p>}><Preview3D ref={scene} design={design} shape="ring" light="studio" background={work.background} rotate={false} editing={false} onPaint={() => {}} onReady={setReady}/></Suspense></PreviewBoundary>}
         </div>
         <div className="portfolio-preview-controls"><Tabs value={view} onValueChange={setView}><TabsList><TabsTrigger value="pattern"><Grid2X2 size={15}/>Pattern</TabsTrigger><TabsTrigger value="3d"><Box size={15}/>3D bracelet</TabsTrigger></TabsList></Tabs>{view === "3d" && <Button variant="ghost" size="icon" aria-label="Reset bracelet view" disabled={!ready} onClick={() => scene.current?.reset()}><RotateCcw size={16}/></Button>}</div>
-        <figcaption>{view === "3d" ? "Drag to rotate · Scroll to zoom · Digital simulation" : "Detail of the editable pattern · Digital colour study"}</figcaption>
+        <figcaption>{view === "3d" ? "Drag to rotate · Scroll to zoom · Digital simulation" : "Rendered from the editable pattern · Digital material study"}</figcaption>
       </figure>
       <div className="portfolio-detail-copy"><div className="portfolio-kicker">Bead Atelier · Studio original</div><h1>{work.title}</h1><p>{work.description}</p>
         <dl className="portfolio-facts"><div><dt>Pattern size</dt><dd>{work.rows} × {work.cols}</dd></div><div><dt>Palette</dt><dd>{colors.length} <small>colours</small></dd></div><div><dt>Bead count</dt><dd>{design.cells.length.toLocaleString("en-US")}</dd></div></dl>

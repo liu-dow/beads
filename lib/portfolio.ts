@@ -53,6 +53,12 @@ export const PUBLIC_WORKS: readonly PublicWork[] = [
 ];
 
 export function publicWork(slug: string) { return PUBLIC_WORKS.find(work => work.slug === slug); }
+export const PATTERN_PREVIEW_VERSION = "2";
+export function workPreviewUrl(work: PublicWork, palette: ColorwayId = "original") {
+  return palette === "original"
+    ? `/patterns/${work.slug}.webp?v=${PATTERN_PREVIEW_VERSION}`
+    : `/api/portfolio/${work.slug}/image?palette=${palette}&v=${PATTERN_PREVIEW_VERSION}`;
+}
 export const COLORWAYS = [
   { id: "original", name: "Original", colors: [] },
   { id: "moonlight", name: "Moonlight", colors: [["Midnight", "#222b39"], ["Silver blue", "#8499b4"], ["Slate", "#45586b"], ["Silver", "#bdc8d0"], ["Pearl", "#f0efeb"], ["Mist", "#c2dce0"], ["Dusk", "#9c93b1"], ["Lavender", "#b5aec4"], ["Blue grey", "#607d99"]] },

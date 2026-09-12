@@ -8,7 +8,7 @@ function fitText(x:CanvasRenderingContext2D,s:string,px:number,py:number,size:nu
 function footer(x:CanvasRenderingContext2D,d:Design,n:number){x.fillStyle="#dbe2df";x.fillRect(70,H-76,W-140,1);text(x,"BEAD ATELIER",70,H-38,18,"#667c73");fitText(x,`${d.title} · ${d.author}`,620,H-38,18,650);text(x,String(n).padStart(2,"0"),W-100,H-38,18,"#667c73");}
 function imageFrom(src:string):Promise<HTMLImageElement>{return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error("The preview image could not be loaded. Please export again."));img.src=src;});}
 export function downloadImage(data:string,title:string){const a=document.createElement("a");a.href=data;a.download=`${title||"bead-design"}-preview.png`;a.click();}
-export async function exportPdf(d:Design,preview:string|null,download=true,options:{monochrome?:boolean}={}){
+export async function exportPdf(d:Design,preview:string|null,download=true,options:{monochrome?:boolean;includeStock?:boolean}={}){
   const glyphs=d.title+d.author+d.description+d.palette.map(p=>p.name+(p.sku??"")).join("")+"Bead Atelier pattern and making chart, materials, dimensions, author, columns and rows.";
   if (/\p{Script=Han}/u.test(glyphs)) await Promise.all([document.fonts.load('400 24px "Noto Sans SC"',glyphs),document.fonts.load('500 24px "Noto Sans SC"',glyphs)]);
   await document.fonts.ready;
@@ -33,13 +33,13 @@ export async function exportPdf(d:Design,preview:string|null,download=true,optio
     text(x,"Letters match the material list. Each cell is one bead; numbers indicate chart positions.",70,1050,20,"#6f837a");footer(x,d,num);add(c);
   }
   for(let start=0;start<counts.length;start+=10){
-    const m=page();text(m.x,"Material list",70,85,38,"#173c35",600);text(m.x,`Reserve includes ${d.fit?.allowance??5}% allowance. Purchase quantities exclude stock.`,70,135,23,"#6f837a");
-    const columns=[70,190,850,1040,1230,1420],labels=["Code","Material / physical code","Quantity","With reserve","Stock / beads","To buy"];
+    const m=page();text(m.x,"Material list",70,85,38,"#173c35",600);text(m.x,`Reserve includes ${d.fit?.allowance??5}% allowance.${options.includeStock?" Purchase quantities exclude stock.":""}`,70,135,23,"#6f837a");
+    const columns=options.includeStock?[70,190,850,1040,1230,1420]:[70,190,1040,1300],labels=["Code","Material / physical code","Quantity","With reserve",...(options.includeStock?["Stock / beads","To buy"]:[])];
     m.x.fillStyle="#eef3ef";m.x.fillRect(65,175,1550,59);labels.forEach((s,i)=>text(m.x,s,columns[i],214,22,"#526d60",500));
     counts.slice(start,start+10).forEach((p,i)=>{
       const y=280+i*64;m.x.fillStyle=options.monochrome?"#fff":p.hex;m.x.fillRect(75,y-21,25,25);m.x.strokeStyle="#718277";m.x.strokeRect(75,y-21,25,25);text(m.x,p.id,110,y,22);
       fitText(m.x,p.name,190,y,23,620);fitText(m.x,p.sku||FINISH_NAMES[p.finish],190,y+24,17,620);
-      [p.count,p.reserve,p.stock,p.purchase].forEach((value,n)=>text(m.x,String(value),columns[n+2],y,24));
+      [p.count,p.reserve,...(options.includeStock?[p.stock,p.purchase]:[])].forEach((value,n)=>text(m.x,String(value),columns[n+2],y,24));
     });
     const y=970;text(m.x,`Total ${d.cells.length.toLocaleString()} beads · ${counts.length} colours`,70,y,26,"#173c35",600);
     if(d.fit)text(m.x,`Wrist ${d.fit.wrist} mm · Ease ${d.fit.ease} mm · Clasp ${d.fit.clasp} mm`,70,1010,20,"#6f837a");

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { COLORWAYS, colorwayId, studioUrl, workDesign, workPalette, coloredWork, type ColorwayId, type PublicWork } from "@/lib/portfolio";
+import { COLORWAYS, colorwayId, studioUrl, workDesign, workPalette, workPreviewUrl, coloredWork, type ColorwayId, type PublicWork } from "@/lib/portfolio";
 import { trackConversion } from "@/lib/conversion-events";
 import styles from "@/app/home.module.css";
 
@@ -26,7 +26,7 @@ export function HomeDesignDemo({ works }: { works: PublicWork[] }) {
     <div className={styles.demoBar}><span><i/>THE COLOUR STUDIO</span><Select value={slug} onValueChange={setSlug}><SelectTrigger aria-label="Demo pattern"><SelectValue/></SelectTrigger><SelectContent>{works.map(work => <SelectItem key={work.slug} value={work.slug}>{work.title}</SelectItem>)}</SelectContent></Select></div>
     <Tabs value={view} onValueChange={setView} className={styles.demoViewport}>
       <div className={styles.demoViewSwitch}><TabsList aria-label="Preview format"><TabsTrigger value="pattern"><Grid2X2 size={15}/>Pattern</TabsTrigger><TabsTrigger value="3d"><Box size={15}/>3D bracelet</TabsTrigger></TabsList></div>
-      <TabsContent value="pattern" className={styles.demoPanel}><img src={palette === "original" ? `/patterns/${work.slug}.webp` : `/api/portfolio/${work.slug}/image?palette=${palette}`} alt={`${work.title} in the ${palette} palette — live pattern preview`} width={1200} height={960} loading="lazy"/></TabsContent>
+      <TabsContent value="pattern" className={styles.demoPanel}><img src={workPreviewUrl(work, palette)} alt={`${work.title} in the ${palette} palette — rendered bead bracelet`} width={1200} height={960} loading="lazy"/></TabsContent>
       <TabsContent value="3d" className={styles.demoPanel}><SceneBoundary><Suspense fallback={<p className={styles.demoLoading} role="status">Opening the 3D studio…</p>}><Scene design={design} shape="ring" light="studio" background="#e5e9df" rotate={false} editing={false} onPaint={() => {}}/></Suspense></SceneBoundary></TabsContent>
       <span className={styles.demoCaption}>{view === "3d" ? "Drag to rotate · Digital simulation" : "An actual editable pattern"}</span>
     </Tabs>
