@@ -61,7 +61,7 @@ export function AuthForm({onSignedIn,onGuest,initialError="",configured=true,goo
     <h1>{mode==="signup"?"Create your account":mode==="forgot"?"Reset your password":mode==="resend"?"Resend verification":"Sign in to Bead Atelier"}</h1>
     <p className="account-intro">{isEmailOnly?"Enter your email and we’ll send you a secure link.":"Save your work and continue creating on any device."}</p>
     {!isEmailOnly&&<Tabs value={mode} onValueChange={changeMode}><TabsList className="account-tabs"><TabsTrigger value="login">Sign in</TabsTrigger><TabsTrigger value="signup">Create account</TabsTrigger></TabsList></Tabs>}
-    {!isEmailOnly&&googleEnabled&&<><Button variant="outline" className="account-google" disabled={!configured||busy} onClick={()=>{window.location.assign("/auth/google");}}><LogIn size={18}/>Continue with Google</Button><div className="account-divider"><span>or use email</span></div></>}
+    {!isEmailOnly&&googleEnabled&&<><Button asChild variant="outline" className="account-google" aria-disabled={!configured||busy}><a href={configured&&!busy?"/auth/google":"#account-email"}><LogIn size={18}/>Continue with Google</a></Button><div className="account-divider"><span>or use email</span></div></>}
     <form onSubmit={submit}>
       {mode==="signup"&&<div className="account-field"><Label htmlFor="account-name">Display name</Label><Input id="account-name" autoComplete="nickname" value={name} onChange={e=>setName(e.target.value)} required maxLength={80} disabled={busy}/></div>}
       <div className="account-field"><Label htmlFor="account-email">Email</Label><Input id="account-email" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required maxLength={254} disabled={busy}/></div>

@@ -32,7 +32,7 @@ export const BraceletScene=forwardRef<SceneHandle,Props>(function BraceletScene(
     const el=host.current;if(!el)return;let renderer:THREE.WebGLRenderer;
     try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:"high-performance"});}catch{setState("error");return;}
     renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
-    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.domElement.setAttribute("aria-label","Rotatable, zoomable 3D bead bracelet preview");el.appendChild(renderer.domElement);
+    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.domElement.setAttribute("aria-label","Rotatable, zoomable 3D bead bracelet preview");el.appendChild(renderer.domElement);
     const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,.1,1000),controls=new OrbitControls(camera,renderer.domElement);
     controls.enableDamping=true;controls.dampingFactor=.065;controls.enablePan=true;controls.minDistance=35;controls.maxDistance=500;controls.maxPolarAngle=Math.PI*.86;controls.autoRotateSpeed=.65;
     const room=new RoomEnvironment();const pmrem=new THREE.PMREMGenerator(renderer);const environment=pmrem.fromScene(room,.035);scene.environment=environment.texture;room.dispose();pmrem.dispose();

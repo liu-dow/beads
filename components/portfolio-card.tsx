@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- generated gallery previews are versioned WebP assets and must bypass the image proxy */
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { workPalette, studioUrl, workPreviewUrl, type PublicWork } from "@/lib/portfolio";

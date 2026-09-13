@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- generated previews are already optimized WebP assets and must bypass the image proxy */
 import { Component, Suspense, lazy, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Box, ImageIcon, RotateCcw } from "lucide-react";

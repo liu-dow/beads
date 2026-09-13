@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- generated pattern images are already optimized or SVG and intentionally bypass the image proxy */
 
 import { Component, Suspense, lazy, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";

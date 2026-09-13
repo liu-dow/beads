@@ -36,7 +36,7 @@ export default function Home() {
     <header className={styles.header}>
       <Link href="/" className={styles.brand} aria-label="Bead Atelier home"><AtelierMark/><strong>Bead Atelier<span>.</span></strong></Link>
       <nav className={styles.nav} aria-label="Main navigation">
-        <Link href="/portfolio">Free patterns</Link><a className={styles.desktopLink} href="#how-it-works">How it works</a><Link className={styles.desktopLink} href="/patterns/first-peyote-pattern">Maker's guide</Link>
+        <Link href="/portfolio">Free patterns</Link><a className={styles.desktopLink} href="#how-it-works">How it works</a><Link className={styles.desktopLink} href="/patterns/first-peyote-pattern">Maker’s guide</Link>
         <Button asChild className={styles.navCta}><Link href="/studio">Open studio <ArrowUpRight size={16}/></Link></Button>
       </nav>
     </header>
@@ -61,7 +61,7 @@ export default function Home() {
       <section id="patterns" className={styles.patternSection} aria-labelledby="patterns-title">
         <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>START WITH SOMETHING YOU LOVE</p><h2 id="patterns-title">Free bead bracelet patterns.<br/><em>Ready for your own twist.</em></h2></div><div><p>A small collection, a world of colour.<br/>Choose a design; change as much or as little as you like.</p><Link className={styles.textLink} href="/portfolio">Explore all {PUBLIC_WORKS.length} patterns <ArrowUpRight size={16}/></Link></div></div>
         <div className={styles.patternGrid}>{featured.map(work => <article className={styles.patternCard} key={work.slug}>
-          <Link href={`/portfolio/${work.slug}`} aria-label={`Explore ${work.title}`}><img src={workPreviewUrl(work)} alt={`${work.title} — ${work.category.toLowerCase()} peyote bracelet pattern`} width={1200} height={960} loading="lazy"/><span className={styles.patternBadge}>Free pattern</span></Link>
+          <Link href={`/portfolio/${work.slug}`} aria-label={`Explore ${work.title}`}><Image src={workPreviewUrl(work)} alt={`${work.title} — ${work.category.toLowerCase()} peyote bracelet pattern`} width={1200} height={960} sizes="(max-width: 760px) 92vw, 30vw" loading="lazy" unoptimized/><span className={styles.patternBadge}>Free pattern</span></Link>
           <div className={styles.patternMeta}><span>{work.category}</span><span>{workPalette(work).length} colours · {work.rows} rows</span></div>
           <h3><Link href={`/portfolio/${work.slug}`}>{work.title}</Link></h3><p>{work.description}</p>
           <Link className={styles.patternCustomize} href={studioUrl(work)}>Make this pattern yours <ArrowUpRight size={17}/></Link>
@@ -83,7 +83,7 @@ export default function Home() {
           <ul className={styles.exportFeatures}><li><Check/>Numbered sections and bead-by-bead symbols</li><li><Check/>Bead quantities with a reserve allowance</li><li><Check/>Making mode starts without saving first</li></ul>
           <SampleChartDownload work={sample}/><p className={styles.smallNote}>See what you will get: a free English PDF chart.<br/>No email address or account required.</p>
         </div>
-        <div className={styles.chartPreview}><div className={styles.chartHeader}><span>BEAD ATELIER / PATTERN NOTES</span><FileDown size={20}/></div><h3>{sample.title}</h3><p>Peyote stitch · {sample.rows} × {sample.cols} beads</p><div className={styles.chartImage}><img src={`/api/portfolio/${sample.slug}/image?full=1`} alt="Complete Tidal Rhythm bead pattern, ready to customize and export" width={1120} height={225} loading="lazy"/></div>
+        <div className={styles.chartPreview}><div className={styles.chartHeader}><span>BEAD ATELIER / PATTERN NOTES</span><FileDown size={20}/></div><h3>{sample.title}</h3><p>Peyote stitch · {sample.rows} × {sample.cols} beads</p><div className={styles.chartImage}><Image src={`/api/portfolio/${sample.slug}/image?full=1`} alt="Complete Tidal Rhythm bead pattern, ready to customize and export" width={1120} height={225} sizes="(max-width: 760px) 92vw, 48vw" loading="lazy" unoptimized/></div>
           <div className={styles.chartTable}><div><span>PALETTE</span><span>BEADS</span></div>{counts.map(color => <div key={color.id}><span><i style={{ background: color.hex }}/>{color.id} · {color.name}</span><b>{color.count.toLocaleString("en-US")}</b></div>)}</div><p className={styles.chartCaption}><Ruler size={15}/>Actual pattern data and bead quantities.<br/>The PDF adds numbered sections and symbols.</p>
         </div>
       </section>

@@ -11,13 +11,13 @@ import type { Design } from "@/lib/design";
 const guestUser:AccountUser={id:"guest",email:"",displayName:"Guest creator"};
 const GUEST_ONLY = process.env.NEXT_PUBLIC_GUEST_ONLY !== "false";
 
-export default function StudioGate({initialDesign}:{initialDesign?:Design}){
+export default function StudioGate({initialDesign,sourceSlug}:{initialDesign?:Design;sourceSlug?:string}){
   const router=useRouter();
-  const [user,setUser]=useState<AccountUser|null>(null),[loading,setLoading]=useState(true);
+  const [user,setUser]=useState<AccountUser|null>(null),[loading,setLoading]=useState(!GUEST_ONLY);
   const alive=useRef(true);
   useEffect(()=>{
     // First public release is guest-only; account infrastructure remains available for a later rollout.
-    if (GUEST_ONLY) { setLoading(false); return; }
+    if (GUEST_ONLY) return;
     alive.current=true;
     const timer=window.setTimeout(async()=>{
       try{
@@ -40,6 +40,6 @@ export default function StudioGate({initialDesign}:{initialDesign?:Design}){
   const signOut=useCallback(async()=>{await accountAction("logout",{});setUser(null);router.replace("/login");},[router]);
   const openLogin=useCallback(async()=>{router.push("/login");},[router]);
   if(loading)return <div className="account-screen"><div className="account-card account-loading" role="status"><LoaderCircle className="animate-spin"/><p>Opening studio…</p></div></div>;
-  if(user)return <AccountContext.Provider value={{user,guest:false,apiFetch,signOut}}><Studio key={user.id} initialDesign={initialDesign}/></AccountContext.Provider>;
-  return <AccountContext.Provider value={{user:guestUser,guest:true,apiFetch:async()=>Response.json({error:"Guest data is saved only on this device."},{status:403}),signOut:openLogin}}><Studio key="guest" initialDesign={initialDesign}/></AccountContext.Provider>;
+  if(user)return <AccountContext.Provider value={{user,guest:false,apiFetch,signOut}}><Studio key={user.id} initialDesign={initialDesign} initialSourceSlug={sourceSlug}/></AccountContext.Provider>;
+  return <AccountContext.Provider value={{user:guestUser,guest:true,apiFetch:async()=>Response.json({error:"Guest data is saved only on this device."},{status:403}),signOut:openLogin}}><Studio key="guest" initialDesign={initialDesign} initialSourceSlug={sourceSlug}/></AccountContext.Provider>;
 }
