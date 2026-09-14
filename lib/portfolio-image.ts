@@ -65,9 +65,52 @@ function braceletPreview(work: PublicWork, design: Design) {
   </svg>`;
 }
 
+export function braceletSvg(work: PublicWork) {
+  // Transparent cut-outs sit naturally beside charts without a second image box.
+  return braceletPreview(work, workDesign(work)).replace(`<path d="M0 0H${W}V${H}H0Z" fill="url(#backdrop)"/>`, "");
+}
+
+// A standalone preview explains the tool: the exact chart on the left becomes
+// the same bracelet on the right. The material renderer remains available for
+// interfaces which already show their own corresponding 2D chart.
+function designShowcase(work: PublicWork, design: Design) {
+  const columns = Math.min(32, design.cols), pitch = 10;
+  const chart = design.cells.flatMap((paletteIndex, index) => {
+    const col = index % design.cols, row = Math.floor(index / design.cols);
+    return col < columns ? `<rect data-chart-cell="${index}" x="${col * pitch}" y="${(row + (col % 2) * .5) * pitch}" width="9.2" height="9.2" rx=".9" fill="${design.palette[paletteIndex].hex}" stroke="#283a3020" stroke-width=".4"/>` : [];
+  }).join("");
+  const used = design.palette.filter((_, index) => design.cells.includes(index));
+  const bracelet = braceletPreview(work, design).replace('<svg xmlns=', '<svg x="440" y="207" width="428" height="342.4" preserveAspectRatio="xMidYMid meet" xmlns=').replace(` width="${W}" height="${H}"`, "");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <title>${escape(work.title)} — design a bead pattern, preview the bracelet</title>
+    <desc>Editable 2D peyote chart detail and the matching 3D bracelet. Change the palette in Bead Atelier, then export a printable making chart. Colours and finishes are approximate.</desc>
+    <path d="M0 0H900V720H0Z" fill="#faf9f6"/>
+    <g font-family="Arial, Helvetica, sans-serif" fill="#30362f">
+      <text x="34" y="43" font-size="16" letter-spacing="2">BEAD ATELIER / PATTERN DESIGNER</text>
+      <text x="32" y="99" font-family="Georgia, serif" font-size="43">${escape(work.title)}</text>
+      <path d="M34 128H866" stroke="#d6dacf"/>
+      <text x="34" y="173" font-size="23">01 / 2D bead pattern</text>
+      <text x="459" y="173" font-size="23">02 / Bracelet preview</text>
+      <path d="M32 206H404V550H32Z" fill="#fff"/>
+      <g transform="translate(65 ${n(378 - (design.rows + .5) * pitch / 2)})">
+        <g fill="#777c72" font-size="10" text-anchor="middle">${[1, 8, 16, 24, 32].filter(col => col <= columns).map(col => `<text x="${(col - 1) * pitch + 4.6}" y="-12">${col}</text>`).join("")}${[1, 6, 11, 16, 21].filter(row => row <= design.rows).map(row => `<text x="-18" y="${(row - 1) * pitch + 8}">${row}</text>`).join("")}</g>
+        ${chart}
+      </g>
+      ${bracelet}
+      <path d="M412 373H432m-6-6 7 6-7 6" fill="none" stroke="#79413d" stroke-width="2"/>
+      <text x="34" y="578" font-size="16" fill="#696f63">Pattern detail · columns 1–${columns}</text>
+      <text x="459" y="578" font-size="16" fill="#696f63">The same pattern, wrapped in 3D</text>
+      <path d="M34 605H866" stroke="#d6dacf"/>
+      ${used.map((color, index) => `<rect x="${34 + index * 28}" y="628" width="23" height="23" rx="2" fill="${color.hex}" stroke="#283a3020"/>`).join("")}
+      <text x="866" y="647" text-anchor="end" font-size="19">${design.rows} rows × ${design.cols} columns · ${used.length} colours</text>
+      <text x="34" y="690" font-size="20" fill="#79413d">Edit the pattern. Try your colours. Print your chart.</text>
+    </g>
+  </svg>`;
+}
+
 export function patternSvg(work: PublicWork, full = false) {
   const design = workDesign(work);
-  if (!full) return braceletPreview(work, design);
+  if (!full) return designShowcase(work, design);
   // Making charts stay flat and exact so that every editable cell remains readable.
   const cell = 10, width = design.cols * cell, height = (design.rows + .5) * cell;
   const beads = design.cells.map((paletteIndex, index) => {

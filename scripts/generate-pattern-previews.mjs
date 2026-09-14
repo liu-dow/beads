@@ -6,7 +6,7 @@ import { createServer } from "vite";
 const vite = await createServer({ configFile: false, appType: "custom", cacheDir: ".sites-runtime/preview-generator", server: { middlewareMode: true, hmr: false, ws: false, watch: null } });
 try {
   const { PUBLIC_WORKS } = await vite.ssrLoadModule("/lib/portfolio.ts");
-  const { patternSvg } = await vite.ssrLoadModule("/lib/portfolio-image.ts");
+  const { patternSvg, braceletSvg } = await vite.ssrLoadModule("/lib/portfolio-image.ts");
   await fs.mkdir("public/patterns", { recursive: true });
   for (const work of PUBLIC_WORKS) {
     // Render the geometry once at double output resolution, then downsample clean edges.
@@ -18,6 +18,10 @@ try {
       await fs.writeFile(`${path}.tmp`, bytes);
       await fs.rename(`${path}.tmp`, path);
     }
+    const braceletPath = `public/patterns/${work.slug}-bracelet.webp`;
+    const bracelet = await sharp(Buffer.from(braceletSvg(work)), { density: 192 }).resize(1200, 960).webp({ quality: 88, effort: 6 }).toBuffer();
+    await fs.writeFile(`${braceletPath}.tmp`, bracelet);
+    await fs.rename(`${braceletPath}.tmp`, braceletPath);
     console.log(`${work.slug}: 1200 × 960 · ${Math.round(webp.length / 1024)} KB WebP`);
   }
   console.log(`Generated ${PUBLIC_WORKS.length} pattern previews.`);

@@ -61,11 +61,11 @@ export function WorkExperience({ work, initialPalette = "original" }: { work: Pu
   return <>
     <div className="portfolio-detail">
       <figure className="portfolio-detail-image">
-        <div className="portfolio-preview-frame">
-          {view === "pattern" ? <img src={workPreviewUrl(work, palette)} alt={`${work.title} rendered bead bracelet in ${colors.slice(0, 3).map(color => color.name.toLowerCase()).join(", ")}`} width={1200} height={960} fetchPriority="high"/> : <PreviewBoundary><Suspense fallback={<p className="portfolio-preview-message" role="status">Preparing the 3D preview…</p>}><Preview3D ref={scene} design={design} shape="ring" light="studio" background={work.background} rotate={false} editing={false} onPaint={() => {}} onReady={setReady}/></Suspense></PreviewBoundary>}
+        <div className="portfolio-preview-frame" data-view={view}>
+          {view === "pattern" ? <img src={workPreviewUrl(work, palette)} alt={`${work.title} — editable 2D bead chart and matching bracelet preview in ${colors.slice(0, 3).map(color => color.name.toLowerCase()).join(", ")}`} width={1200} height={960} fetchPriority="high"/> : <PreviewBoundary><Suspense fallback={<p className="portfolio-preview-message" role="status">Preparing the 3D preview…</p>}><Preview3D ref={scene} design={design} shape="ring" light="studio" background={work.background} rotate={false} editing={false} onPaint={() => {}} onReady={setReady}/></Suspense></PreviewBoundary>}
         </div>
         <div className="portfolio-preview-controls"><Tabs value={view} onValueChange={setView}><TabsList><TabsTrigger value="pattern"><Grid2X2 size={15}/>Pattern</TabsTrigger><TabsTrigger value="3d"><Box size={15}/>3D bracelet</TabsTrigger></TabsList></Tabs>{view === "3d" && <Button variant="ghost" size="icon" aria-label="Reset bracelet view" disabled={!ready} onClick={() => scene.current?.reset()}><RotateCcw size={16}/></Button>}</div>
-        <figcaption>{view === "3d" ? "Drag to rotate · Scroll to zoom · Digital simulation" : "Rendered from the editable pattern · Digital material study"}</figcaption>
+        <figcaption>{view === "3d" ? "Drag to rotate · Scroll to zoom · Digital simulation" : "2D pattern → bracelet preview · Both views use the same bead colours"}</figcaption>
       </figure>
       <div className="portfolio-detail-copy"><div className="portfolio-kicker">Bead Atelier · Studio original</div><h1>{work.title}</h1><p>{work.description}</p>
         <dl className="portfolio-facts"><div><dt>Pattern size</dt><dd>{work.rows} × {work.cols}</dd></div><div><dt>Palette</dt><dd>{colors.length} <small>colours</small></dd></div><div><dt>Bead count</dt><dd>{design.cells.length.toLocaleString("en-US")}</dd></div></dl>

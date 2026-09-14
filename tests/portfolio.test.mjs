@@ -9,7 +9,7 @@ const vite = await createServer({configFile:false,appType:"custom",cacheDir:".si
 after(()=>vite.close());
 const { PUBLIC_WORKS, publicWork, workDesign, remixWork, filterWorks, galleryUrl, COLORWAYS, colorwayId, coloredWork, studioUrl } = await vite.ssrLoadModule("/lib/portfolio.ts");
 const { designSchema } = await vite.ssrLoadModule("/lib/design-schema.ts");
-const { patternSvg } = await vite.ssrLoadModule("/lib/portfolio-image.ts");
+const { patternSvg, braceletSvg } = await vite.ssrLoadModule("/lib/portfolio-image.ts");
 const { portfolioMetadata, parsePublicOrigin, jsonLd, xmlEscape } = await vite.ssrLoadModule("/lib/portfolio-seo.ts");
 
 test("every public gallery item has a valid, unique, English, editable pattern",()=>{
@@ -84,6 +84,32 @@ test("material renders preserve every bead and palette index and remain determin
     assert.doesNotMatch(svg,/NaN|Infinity|undefined|<image\b|<script\b/);
     assert.equal(svg,patternSvg(colored));
   }
+});
+
+test("standalone previews explain the relationship between the chart and bracelet", () => {
+  for (const work of PUBLIC_WORKS) for (const variant of COLORWAYS) {
+    const current = coloredWork(work, variant.id), design = workDesign(current), svg = patternSvg(current);
+    assert.match(svg, /01 \/ 2D bead pattern/);
+    assert.match(svg, /02 \/ Bracelet preview/);
+    assert.match(svg, /Edit the pattern\. Try your colours\. Print your chart\./);
+    const chart = [...svg.matchAll(/<rect data-chart-cell="(\d+)"[^>]*fill="([^"]+)"/g)];
+    assert.equal(chart.length, design.rows * Math.min(32, design.cols));
+    for (const [, index, hex] of chart) assert.equal(hex, design.palette[design.cells[Number(index)]].hex);
+    assert.doesNotMatch(braceletSvg(current), /data-chart-cell|01 \/ 2D/);
+  }
+});
+
+test("image routes serve explanatory previews and preserve complete making charts", async () => {
+  const { GET } = await vite.ssrLoadModule("/app/api/portfolio/[slug]/image/route.ts");
+  const get = async query => GET(new Request(`https://beads.example.com/api/portfolio/tidal-rhythm/image?${query}`), { params: Promise.resolve({ slug: "tidal-rhythm" }) });
+  const response = await get("palette=moonlight&v=3");
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "image/svg+xml; charset=utf-8");
+  assert.match(await response.text(), /01 \/ 2D bead pattern/);
+  assert.doesNotMatch(await (await get("palette=moonlight&view=bracelet&v=3")).text(), /data-chart-cell/);
+  const full = await (await get("palette=moonlight&view=bracelet&full=1")).text();
+  assert.equal((full.match(/<rect /g) || []).length, 22 * 112);
+  assert.doesNotMatch(full, /<use |01 \/ 2D/);
 });
 
 test("preview URLs invalidate old images and retain palette selections",async()=>{

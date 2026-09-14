@@ -53,11 +53,17 @@ export const PUBLIC_WORKS: readonly PublicWork[] = [
 ];
 
 export function publicWork(slug: string) { return PUBLIC_WORKS.find(work => work.slug === slug); }
-export const PATTERN_PREVIEW_VERSION = "2";
+export const PATTERN_PREVIEW_VERSION = "3";
 export function workPreviewUrl(work: PublicWork, palette: ColorwayId = "original") {
   return palette === "original"
     ? `/patterns/${work.slug}.webp?v=${PATTERN_PREVIEW_VERSION}`
     : `/api/portfolio/${work.slug}/image?palette=${palette}&v=${PATTERN_PREVIEW_VERSION}`;
+}
+// Use the unannotated render only where the UI already supplies a paired chart.
+export function braceletPreviewUrl(work: PublicWork, palette: ColorwayId = "original") {
+  return palette === "original"
+    ? `/patterns/${work.slug}-bracelet.webp?v=${PATTERN_PREVIEW_VERSION}`
+    : `/api/portfolio/${work.slug}/image?palette=${palette}&view=bracelet&v=${PATTERN_PREVIEW_VERSION}`;
 }
 export const COLORWAYS = [
   { id: "original", name: "Original", colors: [] },

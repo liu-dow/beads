@@ -66,7 +66,7 @@ test("featured examples and the demo expose valid pattern and edit links without
   assert.ok(links.includes("/patterns/first-peyote-pattern"));
   assert.match(html, /aria-label="Demo pattern"/);
   assert.match(html, /aria-label="Demo colour palette"/);
-  assert.match(html, /alt="[^"]+rendered bead bracelet"/);
+  assert.match(html, /alt="[^"]+rendered bead bracelet matching the 2D chart"/);
   assert.doesNotMatch(html, /<canvas\b/, "initial rendering does not depend on WebGL");
 });
 
@@ -79,7 +79,8 @@ test("server-rendered content explains the workflow and provides concrete materi
   assert.match(html, /<button\b[^>]*>[\s\S]*?Download a sample PDF[\s\S]*?<\/button>/);
   for (const code of ["DB0010", "DB0044", "DB0031", "DB0200"]) assert.ok(html.includes(code));
   assert.match(html, /\/api\/portfolio\/tidal-rhythm\/image\?full=1/);
-  assert.match(html, /Digital illustration/, "inspiration artwork is not presented as an actual product photograph");
+  assert.doesNotMatch(html, /\/images\/home-bracelet\.webp/, "homepage uses actual pattern previews rather than a lifestyle illustration");
+  assert.match(html, /Pattern and quantities from the studio/);
   assert.match(html, /Save in this browser/);
   assert.ok(HOME_FAQS.some(item => /do not sync across devices/.test(item.answer)));
   assert.ok(HOME_FAQS.some(item => /are not editable project backups/.test(item.answer)));
@@ -115,15 +116,47 @@ test("local previews omit canonical and schema URLs and stay out of the index", 
 test("first-screen experience explains the product and offers a real editable preview", () => {
   const html = render();
   const hero = html.slice(html.indexOf('<section'), html.indexOf('</section>'));
-  assert.match(hero, /<h1[^>]*>Design a bead bracelet/);
-  assert.match(hero, /FREE PEYOTE BRACELET PATTERN MAKER/);
+  assert.match(hero, /<h1[^>]*>Design your bracelet,<br\s*\/>bead by bead\./);
+  assert.match(hero, /Free online bead pattern designer/);
+  assert.match(hero, /Draw a peyote pattern/);
   assert.match(hero, /id="try-it"/);
   assert.match(hero, /aria-label="Demo colour palette"/);
-  assert.match(hero, /Continue with this design/);
+  assert.match(hero, /Start designing/);
+  assert.match(hero, /Edit this pattern/);
+  assert.match(hero, /aria-label="2D pattern preview"/);
+  assert.match(hero, /Both views update together/);
+  assert.match(hero, /aria-pressed="false"[^>]*>Full chart/);
   assert.match(hero, /loading="eager"/);
   assert.match(hero, /fetchPriority="high"/);
   assert.match(hero, /No account needed/);
   assert.match(hero, /aria-label="Reset preview palette"/);
+});
+
+test("homepage pairs every featured pattern strip with its corresponding bracelet", () => {
+  const html = render();
+  const collection = html.slice(html.indexOf('id="patterns"'), html.indexOf('id="how-it-works"'));
+  for (const slug of ["tidal-rhythm", "ivory-garden", "terracotta-tide"]) {
+    assert.ok(collection.includes(`/api/portfolio/${slug}/image?full=1`));
+    assert.ok(collection.includes(`/patterns/${slug}-bracelet.webp?v=`));
+    assert.ok(hrefs(collection).includes(`/studio?design=${slug}`));
+  }
+});
+
+test("the live 2D preview uses exact cells and colours from the design", async () => {
+  const { BeadPatternPreview } = await vite.ssrLoadModule("/components/bead-pattern-preview.tsx");
+  const { workDesign, COLORWAYS } = await vite.ssrLoadModule("/lib/portfolio.ts");
+  for (const work of PUBLIC_WORKS) for (const colourway of COLORWAYS) for (const full of [false, true]) {
+    const design = workDesign(work, colourway.id);
+    const html = renderToStaticMarkup(React.createElement(BeadPatternPreview, { design, full }));
+    const cells = [...html.matchAll(/<rect\b([^>]+)>/g)].map(match => match[1]);
+    assert.equal(cells.length, design.rows * (full ? design.cols : Math.min(32, design.cols)));
+    for (const cell of cells) {
+      const index = Number(cell.match(/data-chart-cell="(\d+)"/)[1]);
+      const paletteIndex = Number(cell.match(/data-palette="(\d+)"/)[1]);
+      assert.equal(paletteIndex, design.cells[index]);
+      assert.ok(cell.includes(`fill="${design.palette[paletteIndex].hex}"`));
+    }
+  }
 });
 
 test("all FAQ answers are server-rendered and disclosure works without JavaScript", () => {
