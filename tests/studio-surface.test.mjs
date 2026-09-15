@@ -54,4 +54,7 @@ test("studio removes reference galleries while retaining the user's collection",
   assert.doesNotMatch(html,/inspiration-row|preset-card|references-dialog|\/references\//);
   assert.doesNotMatch(html,/Unit price|Estimated cost|[¥￥]/i);
   assert.doesNotMatch(html,/\p{Script=Han}/u);
+  assert.match(html,/viewport mode-2d/);
+  assert.doesNotMatch(html,/Loading the 3D preview|Rotatable, zoomable 3D/);
+  assert.equal([...vite.moduleGraph.idToModuleMap.keys()].some(id=>/node_modules\/three\//.test(id)),false,"rendering the initial editor does not load Three.js");
 });

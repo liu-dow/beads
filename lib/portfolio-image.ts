@@ -74,10 +74,11 @@ export function braceletSvg(work: PublicWork) {
 // the same bracelet on the right. The material renderer remains available for
 // interfaces which already show their own corresponding 2D chart.
 function designShowcase(work: PublicWork, design: Design) {
-  const columns = Math.min(32, design.cols), pitch = 10;
+  const columns = Math.min(Math.max(32, design.rows + 4), design.cols);
+  const pitch = Math.min(10, 320 / columns, 304 / (design.rows + .5));
   const chart = design.cells.flatMap((paletteIndex, index) => {
     const col = index % design.cols, row = Math.floor(index / design.cols);
-    return col < columns ? `<rect data-chart-cell="${index}" x="${col * pitch}" y="${(row + (col % 2) * .5) * pitch}" width="9.2" height="9.2" rx=".9" fill="${design.palette[paletteIndex].hex}" stroke="#283a3020" stroke-width=".4"/>` : [];
+    return col < columns ? `<rect data-chart-cell="${index}" x="${col * pitch}" y="${(row + (col % 2) * .5) * pitch}" width="${n(pitch * .92)}" height="${n(pitch * .92)}" rx="${n(pitch * .09)}" fill="${design.palette[paletteIndex].hex}" stroke="#283a3020" stroke-width=".4"/>` : [];
   }).join("");
   const used = design.palette.filter((_, index) => design.cells.includes(index));
   const bracelet = braceletPreview(work, design).replace('<svg xmlns=', '<svg x="440" y="207" width="428" height="342.4" preserveAspectRatio="xMidYMid meet" xmlns=').replace(` width="${W}" height="${H}"`, "");
@@ -93,7 +94,7 @@ function designShowcase(work: PublicWork, design: Design) {
       <text x="459" y="173" font-size="23">02 / Bracelet preview</text>
       <path d="M32 206H404V550H32Z" fill="#fff"/>
       <g transform="translate(65 ${n(378 - (design.rows + .5) * pitch / 2)})">
-        <g fill="#777c72" font-size="10" text-anchor="middle">${[1, 8, 16, 24, 32].filter(col => col <= columns).map(col => `<text x="${(col - 1) * pitch + 4.6}" y="-12">${col}</text>`).join("")}${[1, 6, 11, 16, 21].filter(row => row <= design.rows).map(row => `<text x="-18" y="${(row - 1) * pitch + 8}">${row}</text>`).join("")}</g>
+        <g fill="#777c72" font-size="10" text-anchor="middle">${[1, 8, 16, 24, 32, 40].filter(col => col <= columns).map(col => `<text x="${(col - 1) * pitch + pitch * .46}" y="-12">${col}</text>`).join("")}${Array.from({length:Math.ceil(design.rows/5)},(_,i)=>i*5+1).map(row => `<text x="-18" y="${(row - 1) * pitch + pitch * .8}">${row}</text>`).join("")}</g>
         ${chart}
       </g>
       ${bracelet}

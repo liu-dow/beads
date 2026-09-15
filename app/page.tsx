@@ -11,7 +11,7 @@ import { publicOrigin } from "@/lib/server/public-origin";
 import { jsonLd, portfolioMetadata, workSocialImage } from "@/lib/portfolio-seo";
 import styles from "./home.module.css";
 
-const featured = [PUBLIC_WORKS[0], PUBLIC_WORKS[5], PUBLIC_WORKS[4]];
+const featured = [PUBLIC_WORKS[0], PUBLIC_WORKS[2], PUBLIC_WORKS[8]];
 const sample = PUBLIC_WORKS[0];
 const materials = ["DB0010", "DB0044", "DB0031", "DB0200"].flatMap(code => BEAD_CATALOG.filter(bead => bead.code === code));
 const steps = [
@@ -53,7 +53,7 @@ export default function Home() {
         <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>The pattern collection</p><h2 id="patterns-title">Find your starting point.</h2><p className={styles.collectionIntro}>Every design opens as a chart you can change.</p></div><Link className={styles.textLink} href="/portfolio">View all {PUBLIC_WORKS.length} patterns <ArrowRight size={16}/></Link></div>
         <div className={styles.patternStudies}>{featured.map((work, index) => <article className={styles.patternStudy} key={work.slug}>
           <div className={styles.patternStudyCopy}><span className={styles.studyNumber}>0{index + 1} / {work.category}</span><h3><Link href={`/portfolio/${work.slug}`}>{work.title}</Link></h3><p>{work.rows} rows · {workPalette(work).length} colours</p><Link className={styles.patternCustomize} href={studioUrl(work)}>Use this pattern <ArrowRight size={15}/></Link></div>
-          <Link className={styles.patternStrip} href={`/portfolio/${work.slug}`} aria-label={`Explore ${work.title}`}><span>2D bead pattern</span><Image src={`/api/portfolio/${work.slug}/image?full=1&v=${PATTERN_PREVIEW_VERSION}`} alt={`Complete editable ${work.title} peyote bead pattern`} width={work.cols * 10} height={(work.rows + .5) * 10} loading="lazy" unoptimized/><span>{work.cols} columns, ready for your colours</span></Link>
+          <Link className={styles.patternStrip} href={`/portfolio/${work.slug}`} aria-label={`Explore ${work.title}`}><span>2D bead pattern</span><Image src={`/api/portfolio/${work.slug}/image?full=1&v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`} alt={`Complete editable ${work.title} peyote bead pattern`} width={work.cols * 10} height={(work.rows + .5) * 10} loading="lazy" unoptimized/><span>{work.cols} columns, ready for your colours</span></Link>
           <Link className={styles.patternOutcome} href={`/portfolio/${work.slug}`} aria-label={`See ${work.title} bracelet preview`}><Image src={braceletPreviewUrl(work)} alt={`${work.title} — bracelet made from the adjoining pattern`} width={1200} height={960} loading="lazy" unoptimized/><span>Bracelet preview <ArrowRight size={13}/></span></Link>
         </article>)}</div>
       </section>
@@ -67,7 +67,7 @@ export default function Home() {
         <figure className={styles.chartPreview}>
           <div className={styles.chartHeader}><span>Bead Atelier / Pattern sheet</span><span>Peyote stitch</span></div>
           <h3>{sample.title}</h3><p>{sample.rows} rows × {sample.cols} columns</p>
-          <div className={styles.chartImage}><Image src={`/api/portfolio/${sample.slug}/image?full=1`} alt="Complete Tidal Rhythm bead pattern, ready to customize and export" width={1120} height={225} sizes="(max-width: 760px) 85vw, 48vw" loading="lazy" unoptimized/></div>
+          <div className={styles.chartImage}><Image src={`/api/portfolio/${sample.slug}/image?full=1&v=${sample.previewVersion ?? PATTERN_PREVIEW_VERSION}`} alt={`Complete ${sample.title} bead pattern, ready to customize and export`} width={sample.cols*10} height={(sample.rows+.5)*10} sizes="(max-width: 760px) 85vw, 48vw" loading="lazy" unoptimized/></div>
           <div className={styles.chartTable}><div><span>Colour</span><span>Beads</span></div>{counts.map(color => <div key={color.id}><span><i style={{ background: color.hex }}/>{color.id} · {color.name}</span><b>{color.count.toLocaleString("en-US")}</b></div>)}</div>
           <figcaption>Pattern and quantities from the studio. The PDF adds numbered sections and bead symbols.</figcaption>
         </figure>

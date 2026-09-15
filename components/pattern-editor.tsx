@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, MoveHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, MoveHorizontal, MoveVertical } from "lucide-react";
 import type { Design } from "@/lib/design";
 import { drawPattern } from "@/lib/pattern-draw";
+import { chartPoint, chartCellAt, chartArrow, type ChartOrientation } from "@/lib/pattern-view";
 import { clampSelection, contains, selectBetween, type Selection, type PatternClip } from "@/lib/pattern-operations";
 
 type Props={
@@ -16,20 +17,25 @@ export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart
   const canvas=useRef<HTMLCanvasElement>(null),overlay=useRef<HTMLCanvasElement>(null),scroll=useRef<HTMLDivElement>(null);
   const drag=useRef<{index:number;x:number;y:number;selection?:Selection}|null>(null),last=useRef(-1);
   const [focus,setFocus]=useState(-1),[hover,setHover]=useState(-1),[preview,setPreview]=useState<Selection|null>(null);
+  const [orientation,setOrientation]=useState<ChartOrientation>("horizontal");
+  const vertical=!mini&&orientation==="vertical";
+  const viewOrientation=vertical?"vertical":"horizontal";
+  const changeOrientation=(next:ChartOrientation)=>{setOrientation(next);setPreview(null);if(scroll.current){scroll.current.scrollLeft=0;scroll.current.scrollTop=0;}};
   const cell=mini?7:20*zoom,pad=mini?8:34,stepY=cell*.88;
   const [navigation,setNavigation]=useState({left:0,max:0,width:0});
   useEffect(()=>{
     const el=scroll.current,content=canvas.current;if(mini||!el||!content)return;
-    const update=()=>setNavigation({left:el.scrollLeft,max:Math.max(0,el.scrollWidth-el.clientWidth),width:el.clientWidth});
+    const update=()=>setNavigation({left:vertical?el.scrollTop:el.scrollLeft,max:Math.max(0,vertical?el.scrollHeight-el.clientHeight:el.scrollWidth-el.clientWidth),width:vertical?el.clientHeight:el.clientWidth});
     const observer=new ResizeObserver(update);observer.observe(el);observer.observe(content);
     el.addEventListener("scroll",update,{passive:true});update();
     return()=>{observer.disconnect();el.removeEventListener("scroll",update);};
-  },[mini,zoom,design.rows,design.cols]);
-  const scrollPage=(direction:number)=>scroll.current?.scrollBy({left:direction*Math.max(cell,navigation.width*.75),behavior:"smooth"});
-  useEffect(()=>{if(canvas.current)drawPattern(canvas.current,design,{cell,symbols,rulers:!mini,flat:!mini,highlightColor:mini?undefined:highlightColor});},[design,cell,symbols,mini,highlightColor]);
+  },[mini,zoom,design.rows,design.cols,vertical]);
+  const scrollPage=(direction:number)=>scroll.current?.scrollBy({[vertical?"top":"left"]:direction*Math.max(cell,navigation.width*.75),behavior:"smooth"});
+  useEffect(()=>{if(canvas.current)drawPattern(canvas.current,design,{orientation:viewOrientation,cell,symbols,rulers:!mini,flat:!mini,highlightColor:mini?undefined:highlightColor});},[design,cell,symbols,mini,highlightColor,viewOrientation]);
   useEffect(()=>{
     const c=overlay.current,base=canvas.current;if(!c||!base||mini)return;
     c.width=base.width;c.height=base.height;const ctx=c.getContext("2d")!;
+    if(vertical)ctx.transform(0,1,1,0,0,0);
     const rect=(s:Selection,dashed:boolean)=>{
       ctx.strokeStyle="#bd6b13";ctx.lineWidth=2;ctx.fillStyle="#d28b2020";ctx.setLineDash(dashed?[6,4]:[]);
       ctx.fillRect(pad+s.col*cell-1,pad+s.row*stepY-1,s.cols*cell,(s.rows+.5)*stepY);
@@ -39,12 +45,11 @@ export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart
     if(preview&&(tool==="paste"||tool==="move"))rect(preview,true);
     const i=activeCell>=0?activeCell:focus;
     if(i>=0&&i<design.cells.length){const r=Math.floor(i/design.cols),col=i%design.cols;ctx.setLineDash([]);ctx.strokeStyle="#162c34";ctx.lineWidth=2.5;ctx.strokeRect(pad+col*cell-1,pad+(r+(col%2)*.5)*stepY-1,cell*.91+2,stepY*.9+2);}
-  },[design,cell,pad,stepY,selection,preview,activeCell,focus,mini,tool]);
-  useEffect(()=>{drag.current=null;last.current=-1;},[tool,design.rows,design.cols]);
+  },[design,cell,pad,stepY,selection,preview,activeCell,focus,mini,tool,vertical]);
+  useEffect(()=>{drag.current=null;last.current=-1;},[tool,design.rows,design.cols,vertical]);
   const locate=(e:React.PointerEvent)=>{
     const b=e.currentTarget.getBoundingClientRect(),x=(e.clientX-b.left)*(canvas.current!.width/b.width),y=(e.clientY-b.top)*(canvas.current!.height/b.height);
-    const c=Math.floor((x-pad)/cell),r=Math.floor((y-pad)/stepY-(c%2)*.5);
-    return c>=0&&c<design.cols&&r>=0&&r<design.rows?r*design.cols+c:-1;
+    return chartCellAt(x,y,design.rows,design.cols,cell,pad,viewOrientation);
   };
   const paint=(i:number)=>{
     if(i<0||i===last.current)return;
@@ -61,12 +66,13 @@ export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart
   };
   const ensureVisible=(i:number)=>{
     const el=scroll.current;if(!el)return;
-    const x=pad+(i%design.cols)*cell,y=pad+Math.floor(i/design.cols)*stepY;
-    if(x<el.scrollLeft||x+cell>el.scrollLeft+el.clientWidth)el.scrollLeft=Math.max(0,x-el.clientWidth/2);
-    if(y<el.scrollTop||y+stepY>el.scrollTop+el.clientHeight)el.scrollTop=Math.max(0,y-el.clientHeight/2);
+    const {x,y}=chartPoint(pad+(i%design.cols)*cell,pad+(Math.floor(i/design.cols)+(i%design.cols%2)*.5)*stepY,viewOrientation);
+    const width=vertical?stepY:cell,height=vertical?cell:stepY;
+    if(x<el.scrollLeft||x+width>el.scrollLeft+el.clientWidth)el.scrollLeft=Math.max(0,x-el.clientWidth/2);
+    if(y<el.scrollTop||y+height>el.scrollTop+el.clientHeight)el.scrollTop=Math.max(0,y-el.clientHeight/2);
   };
-  return <div className={mini?"mini-pattern":"pattern-editor"}>
-    {!mini&&<div className="pattern-instruction"><span>{selection?`Selection ${selection.rows} rows × ${selection.cols} columns`:(activeCell>=0?activeCell:hover)>=0?`Row ${Math.floor((activeCell>=0?activeCell:hover)/design.cols)+1} · Column ${(activeCell>=0?activeCell:hover)%design.cols+1}`:"PEYOTE"}</span>{sizeControl??<span>{design.rows} rows × {design.cols} columns</span>}</div>}
+  return <div className={mini?"mini-pattern":"pattern-editor"} data-orientation={viewOrientation}>
+    {!mini&&<div className="pattern-instruction"><span>{selection?`Selection ${selection.rows} rows × ${selection.cols} columns`:(activeCell>=0?activeCell:hover)>=0?`Row ${Math.floor((activeCell>=0?activeCell:hover)/design.cols)+1} · Column ${(activeCell>=0?activeCell:hover)%design.cols+1}`:"PEYOTE"}</span><div className="chart-orientation" role="group" aria-label="Chart orientation"><button type="button" aria-label="Horizontal chart" aria-pressed={!vertical} onClick={()=>changeOrientation("horizontal")}><MoveHorizontal size={14}/>Horizontal</button><button type="button" aria-label="Vertical chart" aria-pressed={vertical} onClick={()=>changeOrientation("vertical")}><MoveVertical size={14}/>Vertical</button></div>{sizeControl??<span>{design.rows} rows × {design.cols} columns</span>}</div>}
     <div className="pattern-scroll" ref={scroll}><div className="pattern-canvas-stack"><canvas ref={canvas} tabIndex={mini?-1:0} aria-label="2D bead pattern editor" style={{cursor:tool==="pan"?"grab":tool==="move"?"move":"crosshair",touchAction:mini?"auto":"none"}}
       onPointerDown={e=>{
         if(mini||e.button!==0)return;e.currentTarget.focus();const i=locate(e);last.current=-1;
@@ -96,10 +102,11 @@ export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart
         if(e.ctrlKey||e.metaKey||e.altKey)return;
         const current=Math.max(0,Math.min(design.cells.length-1,focus)),row=Math.floor(current/design.cols),col=current%design.cols;
         let n=current;
-        if(e.key==="ArrowRight")n=row*design.cols+Math.min(design.cols-1,col+1);
-        else if(e.key==="ArrowLeft")n=row*design.cols+Math.max(0,col-1);
-        else if(e.key==="ArrowDown")n=Math.min(design.rows-1,row+1)*design.cols+col;
-        else if(e.key==="ArrowUp")n=Math.max(0,row-1)*design.cols+col;
+        const key=chartArrow(e.key,viewOrientation);
+        if(key==="ArrowRight")n=row*design.cols+Math.min(design.cols-1,col+1);
+        else if(key==="ArrowLeft")n=row*design.cols+Math.max(0,col-1);
+        else if(key==="ArrowDown")n=Math.min(design.rows-1,row+1)*design.cols+col;
+        else if(key==="ArrowUp")n=Math.max(0,row-1)*design.cols+col;
         else if(e.key===" "||e.key==="Enter"){
           e.preventDefault();
           if(tool==="pick")onPick?.(design.cells[current]);
@@ -112,9 +119,9 @@ export default function PatternEditor({design,zoom,symbols,onPaint,onStrokeStart
         setFocus(n);setHover(n);onHover?.(n);ensureVisible(n);
       }}
     /><canvas ref={overlay} className="pattern-overlay" aria-hidden="true"/></div></div>
-    {!mini&&navigation.max>0&&<div className="chart-navigation" aria-label="Chart horizontal navigation">
-      <div className="chart-navigation-hint"><span><MoveHorizontal size={15}/>Slide to explore the chart</span><span>Columns {Math.max(1,Math.floor((navigation.left-pad)/cell)+1)}–{Math.min(design.cols,Math.ceil((navigation.left+navigation.width-pad)/cell))} / {design.cols}</span></div>
-      <div className="chart-navigation-controls"><button type="button" aria-label="Scroll chart left" disabled={navigation.left<=1} onClick={()=>scrollPage(-1)}><ArrowLeft size={18}/></button><input type="range" aria-label="Horizontal chart position" min={0} max={navigation.max} value={navigation.left} onChange={e=>{if(scroll.current)scroll.current.scrollLeft=Number(e.target.value);}}/><button type="button" aria-label="Scroll chart right" disabled={navigation.left>=navigation.max-1} onClick={()=>scrollPage(1)}><ArrowRight size={18}/></button></div>
+    {!mini&&navigation.max>0&&<div className="chart-navigation" aria-label={vertical?"Chart vertical navigation":"Chart horizontal navigation"}>
+      <div className="chart-navigation-hint"><span>{vertical?<MoveVertical size={15}/>:<MoveHorizontal size={15}/>} {vertical?"Scroll up or down to explore":"Slide to explore the chart"}</span><span>Columns {Math.max(1,Math.floor((navigation.left-pad)/cell)+1)}–{Math.min(design.cols,Math.ceil((navigation.left+navigation.width-pad)/cell))} / {design.cols}</span></div>
+      <div className="chart-navigation-controls"><button type="button" aria-label={vertical?"Scroll chart up":"Scroll chart left"} disabled={navigation.left<=1} onClick={()=>scrollPage(-1)}>{vertical?<ArrowUp size={18}/>:<ArrowLeft size={18}/>}</button><input type="range" aria-label={vertical?"Vertical chart position":"Horizontal chart position"} min={0} max={navigation.max} value={navigation.left} onChange={e=>{if(scroll.current)scroll.current[vertical?"scrollTop":"scrollLeft"]=Number(e.target.value);}}/><button type="button" aria-label={vertical?"Scroll chart down":"Scroll chart right"} disabled={navigation.left>=navigation.max-1} onClick={()=>scrollPage(1)}>{vertical?<ArrowDown size={18}/>:<ArrowRight size={18}/>}</button></div>
     </div>}
   </div>;
 }

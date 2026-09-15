@@ -65,7 +65,6 @@ test("featured examples and the demo expose valid pattern and edit links without
   assert.ok(links.includes("/portfolio"));
   assert.ok(links.includes("/patterns/first-peyote-pattern"));
   assert.match(html, /aria-label="Demo pattern"/);
-  assert.match(html, /aria-label="Demo colour palette"/);
   assert.match(html, /alt="[^"]+rendered bead bracelet matching the 2D chart"/);
   assert.doesNotMatch(html, /<canvas\b/, "initial rendering does not depend on WebGL");
 });
@@ -78,7 +77,8 @@ test("server-rendered content explains the workflow and provides concrete materi
   assert.match(html, /PDF charts/);
   assert.match(html, /<button\b[^>]*>[\s\S]*?Download a sample PDF[\s\S]*?<\/button>/);
   for (const code of ["DB0010", "DB0044", "DB0031", "DB0200"]) assert.ok(html.includes(code));
-  assert.match(html, /\/api\/portfolio\/tidal-rhythm\/image\?full=1/);
+  assert.match(html, /\/api\/portfolio\/camellia-nocturne\/image\?full=1/);
+  assert.match(html, /\/api\/portfolio\/camellia-nocturne\/image\?full=1&amp;v=4/);
   assert.doesNotMatch(html, /\/images\/home-bracelet\.webp/, "homepage uses actual pattern previews rather than a lifestyle illustration");
   assert.match(html, /Pattern and quantities from the studio/);
   assert.match(html, /Save in this browser/);
@@ -120,22 +120,21 @@ test("first-screen experience explains the product and offers a real editable pr
   assert.match(hero, /Free online bead pattern designer/);
   assert.match(hero, /Draw a peyote pattern/);
   assert.match(hero, /id="try-it"/);
-  assert.match(hero, /aria-label="Demo colour palette"/);
   assert.match(hero, /Start designing/);
   assert.match(hero, /Edit this pattern/);
   assert.match(hero, /aria-label="2D pattern preview"/);
-  assert.match(hero, /Both views update together/);
+  assert.match(hero, /Like this pattern\? Make it yours in the studio\./);
   assert.match(hero, /aria-pressed="false"[^>]*>Full chart/);
   assert.match(hero, /loading="eager"/);
   assert.match(hero, /fetchPriority="high"/);
   assert.match(hero, /No account needed/);
-  assert.match(hero, /aria-label="Reset preview palette"/);
+  assert.doesNotMatch(hero, /Demo colour palette|Reset preview palette|Change the colours/);
 });
 
 test("homepage pairs every featured pattern strip with its corresponding bracelet", () => {
   const html = render();
   const collection = html.slice(html.indexOf('id="patterns"'), html.indexOf('id="how-it-works"'));
-  for (const slug of ["tidal-rhythm", "ivory-garden", "terracotta-tide"]) {
+  for (const slug of ["camellia-nocturne", "orbiting-cat", "silk-ribbon"]) {
     assert.ok(collection.includes(`/api/portfolio/${slug}/image?full=1`));
     assert.ok(collection.includes(`/patterns/${slug}-bracelet.webp?v=`));
     assert.ok(hrefs(collection).includes(`/studio?design=${slug}`));
@@ -149,7 +148,7 @@ test("the live 2D preview uses exact cells and colours from the design", async (
     const design = workDesign(work, colourway.id);
     const html = renderToStaticMarkup(React.createElement(BeadPatternPreview, { design, full }));
     const cells = [...html.matchAll(/<rect\b([^>]+)>/g)].map(match => match[1]);
-    assert.equal(cells.length, design.rows * (full ? design.cols : Math.min(32, design.cols)));
+    assert.equal(cells.length, design.rows * (full ? design.cols : Math.min(Math.max(32, design.rows + 4), design.cols)));
     for (const cell of cells) {
       const index = Number(cell.match(/data-chart-cell="(\d+)"/)[1]);
       const paletteIndex = Number(cell.match(/data-palette="(\d+)"/)[1]);
@@ -174,7 +173,7 @@ test("all FAQ answers are server-rendered and disclosure works without JavaScrip
 test("homepage social sharing uses an actual public pattern image", () => {
   const metadata = generateMetadata();
   assert.equal(metadata.twitter.card, 'summary_large_image');
-  assert.equal(metadata.openGraph.images[0].url, configuredOrigin + '/patterns/tidal-rhythm.png');
+  assert.equal(metadata.openGraph.images[0].url, configuredOrigin + '/patterns/camellia-nocturne.png');
   assert.equal(metadata.openGraph.images[0].width, 1200);
   assert.equal(metadata.openGraph.images[0].height, 960);
 });

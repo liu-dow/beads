@@ -3,7 +3,7 @@ import type { Design } from "@/lib/design";
 // The same cells and palette feed the flat chart and the bracelet preview.
 // This is an exact excerpt, not an illustrative pattern or an editable canvas.
 export function BeadPatternPreview({ design, full = false }: { design: Design; full?: boolean }) {
-  const columns = full ? design.cols : Math.min(32, design.cols);
+  const columns = full ? design.cols : Math.min(Math.max(32, design.rows + 4), design.cols);
   const pitch = 12, left = 22, top = 20;
   const width = columns * pitch + left + 8, height = (design.rows + .5) * pitch + top + 8;
   return <svg xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${design.title} — ${full ? "complete" : `columns 1 to ${columns} of the`} 2D bead chart`}>

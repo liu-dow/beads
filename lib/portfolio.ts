@@ -1,15 +1,20 @@
-import { createDesign, materialCounts, type Design, type Preset } from "./design";
+import { createDesign, materialCounts, type Design, type Preset, type Finish } from "./design";
+import { makeOriginalPattern, type OriginalMotif } from "./original-patterns";
+import { ORIGINAL_WORKS } from "./original-collection";
 
-export const PORTFOLIO_CATEGORIES = ["All designs", "Geometric", "Botanical", "Minimal"] as const;
+export const PORTFOLIO_CATEGORIES = ["All designs", "Geometric", "Botanical", "Whimsical", "Minimal"] as const;
 export type PortfolioCategory = Exclude<typeof PORTFOLIO_CATEGORIES[number], "All designs">;
 export type PublicWork = {
   slug: string; title: string; category: PortfolioCategory; description: string;
   story: string; preset: Preset; background: string; accent: string;
   colors: [string, string][]; rows: number; cols: number;
+  motif?: OriginalMotif;
+  size?: number; finishes?: Finish[]; previewVersion?: string;
 };
 
 // Intentionally published studio studies. Private and device-local work is never queried here.
 export const PUBLIC_WORKS: readonly PublicWork[] = [
+  ...ORIGINAL_WORKS,
   { slug: "tidal-rhythm", title: "Tidal Rhythm", category: "Geometric", preset: "coast", rows: 22, cols: 112,
     background: "#dce6e2", accent: "#284e50",
     description: "Turquoise diamonds, quiet ivory, and a thread of gold. A peyote bracelet pattern inspired by the changing tide.",
@@ -56,14 +61,14 @@ export function publicWork(slug: string) { return PUBLIC_WORKS.find(work => work
 export const PATTERN_PREVIEW_VERSION = "3";
 export function workPreviewUrl(work: PublicWork, palette: ColorwayId = "original") {
   return palette === "original"
-    ? `/patterns/${work.slug}.webp?v=${PATTERN_PREVIEW_VERSION}`
-    : `/api/portfolio/${work.slug}/image?palette=${palette}&v=${PATTERN_PREVIEW_VERSION}`;
+    ? `/patterns/${work.slug}.webp?v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`
+    : `/api/portfolio/${work.slug}/image?palette=${palette}&v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`;
 }
 // Use the unannotated render only where the UI already supplies a paired chart.
 export function braceletPreviewUrl(work: PublicWork, palette: ColorwayId = "original") {
   return palette === "original"
-    ? `/patterns/${work.slug}-bracelet.webp?v=${PATTERN_PREVIEW_VERSION}`
-    : `/api/portfolio/${work.slug}/image?palette=${palette}&view=bracelet&v=${PATTERN_PREVIEW_VERSION}`;
+    ? `/patterns/${work.slug}-bracelet.webp?v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`
+    : `/api/portfolio/${work.slug}/image?palette=${palette}&view=bracelet&v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`;
 }
 export const COLORWAYS = [
   { id: "original", name: "Original", colors: [] },
@@ -82,9 +87,10 @@ export function coloredWork(work: PublicWork, value: ColorwayId = "original"): P
 export function workDesign(work: PublicWork, colorway: ColorwayId = "original"): Design {
   work = coloredWork(work, colorway);
   const design = createDesign(work.preset, work.rows, work.cols);
-  return { ...design, id: work.slug, title: work.title, author: "Bead Atelier", description: work.description,
+  if(work.motif)design.cells=makeOriginalPattern(work.motif,work.rows,work.cols);
+  return { ...design, size: work.size ?? design.size, id: work.slug, title: work.title, author: "Bead Atelier", description: work.description,
     createdAt: "2026-09-09T00:00:00.000Z", updatedAt: "2026-09-09T00:00:00.000Z",
-    palette: work.colors.map(([name, hex], i) => ({ id: String.fromCharCode(65 + i), name, hex, finish: i === 3 ? "metal" : i === 0 ? "matte" : "gloss" })) };
+    palette: work.colors.map(([name, hex], i) => ({ id: String.fromCharCode(65 + i), name, hex, finish: work.finishes?.[i] ?? (i === 3 ? "metal" : i === 0 ? "matte" : "gloss") })) };
 }
 export function workPalette(work: PublicWork) { return materialCounts(workDesign(work)); }
 export function remixWork(work: PublicWork, colorway: ColorwayId = "original"): Design {

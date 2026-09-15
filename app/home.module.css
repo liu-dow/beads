@@ -71,6 +71,7 @@
 .demoViewBar [data-slot=tabs-trigger] { min-height: 44px; height: auto; padding: 4px 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; color: var(--home-muted); font-size: 11px; }
 .demoViewBar [data-slot=tabs-trigger][data-state=active] { box-shadow: none; color: var(--home-ink); text-decoration: underline; text-underline-offset: 5px; }
 .demoControls { display: grid; grid-template-columns: 1.05fr 2fr 1fr; align-items: center; gap: 36px; padding-block: 14px 4px; }
+.demoPrompt { color: var(--home-muted); font-size: 12px; }
 .demoPaletteHeading { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; }
 .demoPaletteHeading small { display: block; font-size: 11px; margin-top: 4px; color: var(--home-muted); }
 .demoReset { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 4px 0 4px 8px; background: none; border: 0; font-size: 10px; cursor: pointer; }

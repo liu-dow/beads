@@ -1,5 +1,6 @@
 /* Design first: the chart, palette, and editing tools share the first screen. */
 .design-workspace{--workspace-ink:#203f35;--workspace-muted:#64756a;background:#f4f7f3}
+.scene-load-message{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;padding:48px;text-align:center;color:#64756a;font-size:14px}
 .design-workspace .app-header{height:58px;padding:0 24px;gap:20px}
 .design-workspace .brand-mark{width:32px;height:32px;border-radius:9px}
 .design-workspace .brand b{font-size:19px}
@@ -216,3 +217,8 @@
 .design-workspace .viewport-status .inline-switch label{color:#746b59}
 .design-workspace .app-footer{color:#82745f}
 @media(max-width:767px){.design-workspace .brand b{font-size:22px}.design-workspace .project-title h1{font-size:25px}.design-workspace .compact-tools{background:#fffcf7;border-color:#d9cdbb}.design-workspace .byline{color:#716c5d}}
+.chart-orientation{display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid #d6ded3;border-radius:6px;background:#f5f7f2}
+.chart-orientation button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:32px;padding:4px 9px;border:0;border-radius:4px;background:transparent;color:#66756b;font:inherit;cursor:pointer}
+.chart-orientation button[aria-pressed="true"]{background:#fff;color:#294c42;box-shadow:0 1px 3px #223d2220}
+.chart-orientation button:focus-visible{outline:2px solid #477569;outline-offset:2px}
+@media(max-width:640px){.chart-orientation button{min-height:40px}}
