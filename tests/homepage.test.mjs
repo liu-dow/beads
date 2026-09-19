@@ -78,7 +78,7 @@ test("server-rendered content explains the workflow and provides concrete materi
   assert.match(html, /<button\b[^>]*>[\s\S]*?Download a sample PDF[\s\S]*?<\/button>/);
   for (const code of ["DB0010", "DB0044", "DB0031", "DB0200"]) assert.ok(html.includes(code));
   assert.match(html, /\/api\/portfolio\/camellia-nocturne\/image\?full=1/);
-  assert.match(html, /\/api\/portfolio\/camellia-nocturne\/image\?full=1&amp;v=4/);
+  assert.match(html, /\/api\/portfolio\/camellia-nocturne\/image\?full=1&amp;v=7-4/);
   assert.doesNotMatch(html, /\/images\/home-bracelet\.webp/, "homepage uses actual pattern previews rather than a lifestyle illustration");
   assert.match(html, /Pattern and quantities from the studio/);
   assert.match(html, /Save in this browser/);
@@ -134,7 +134,7 @@ test("first-screen experience explains the product and offers a real editable pr
 test("homepage pairs every featured pattern strip with its corresponding bracelet", () => {
   const html = render();
   const collection = html.slice(html.indexOf('id="patterns"'), html.indexOf('id="how-it-works"'));
-  for (const slug of ["camellia-nocturne", "orbiting-cat", "silk-ribbon"]) {
+  for (const slug of ["starry-current", "azure-rosette", "gilded-palmette"]) {
     assert.ok(collection.includes(`/api/portfolio/${slug}/image?full=1`));
     assert.ok(collection.includes(`/patterns/${slug}-bracelet.webp?v=`));
     assert.ok(hrefs(collection).includes(`/studio?design=${slug}`));
