@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PortfolioShare } from "./portfolio-share";
-import { COLORWAYS, coloredWork, colorwayId, studioUrl, workDesign, workPalette, workPreviewUrl, PATTERN_PREVIEW_VERSION, type ColorwayId, type PublicWork } from "@/lib/portfolio";
+import { COLORWAYS, coloredWork, colorwayId, studioUrl, workDesign, workPalette, workPreviewUrl, workPreviewVersion, type ColorwayId, type PublicWork } from "@/lib/portfolio";
 import { dimensions } from "@/lib/design";
 import type { SceneHandle } from "./bracelet-scene";
 import { trackConversion } from "@/lib/conversion-events";
@@ -28,7 +28,7 @@ export function WorkExperience({ work, initialPalette = "original" }: { work: Pu
   const current = useMemo(() => coloredWork(work, palette), [work, palette]);
   const design = useMemo(() => workDesign(current), [current]);
   const colors = useMemo(() => workPalette(current), [current]);
-  const size = dimensions(design), imagePath = `/api/portfolio/${work.slug}/image?palette=${palette}&v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`;
+  const size = dimensions(design), imagePath = `/api/portfolio/${work.slug}/image?palette=${palette}&v=${workPreviewVersion(work)}`;
   const path = `/portfolio/${work.slug}${palette === "original" ? "" : `?palette=${palette}`}`;
   const choosePalette = (value: string) => {
     const next = colorwayId(value);

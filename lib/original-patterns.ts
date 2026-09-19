@@ -1,10 +1,14 @@
 // Original bead-scale drawings. No external artwork, logos or character assets.
 // Shared palette: ground, main, shade, metal, light, foliage, accent.
 import { makeCamelliaStudy } from "./camellia-study";
-import { makePlayfulPattern, type PlayfulMotif } from "./playful-patterns";
+import { ART_MOTIFS, makeArtPattern, type ArtMotif } from "./art-patterns";
+import { makeDecoFanStudy, makeFernStudy, makeKoiStudy, makeLunarStudy, makePeacockStudy, makeZelligeStudy } from "./atelier-studies";
 
-export const MOTIFS = ["camellia", "camellia-fine", "puppy", "space-cat", "cloud-bear", "rainbow-balloons", "tulips", "fox", "rabbit", "bows", "strawberries", "bells", "swans", "butterflies", "cherries", "lace", "cats"] as const;
+export const MOTIFS = ["camellia", "camellia-fine", ...ART_MOTIFS, "tulips", "fox", "rabbit", "bows", "strawberries", "bells", "swans", "butterflies", "cherries", "lace", "cats", "koi", "peacock", "deco-fan", "fern", "zellige", "lunar"] as const;
 export type OriginalMotif = typeof MOTIFS[number];
+// Studies composed across the whole cuff. They are not tiled, so the gallery
+// tests must not expect a repeating column period from them.
+export const FINE_MOTIFS = ["camellia-fine", ...ART_MOTIFS, "koi", "peacock", "deco-fan", "fern", "lunar"] as const;
 const animals = {
   fox: ["11...........11", "121.........121", "1221.......1221", "122111111111221", ".1111111111111.", ".1111111111111.", "..12111111121..", "..14411111441..", "..14441114441..", "...444111444...", "....4442444....", ".....44444.....", "......444......"],
   rabbit: ["...44.....44...", "...464...464...", "...464...464...", "...464...464...", "...444...444...", "....4444444....", "...444444444...", "..44444444444..", "..44244444244..", "..44444444444..", "..44644644644..", "...444424444...", "....4444444....", ".....44444....."],
@@ -73,7 +77,13 @@ function motifPixel(motif:OriginalMotif,x:number,y:number){
 
 export function makeOriginalPattern(motif:OriginalMotif,rows:number,cols:number){
   if (motif === "camellia-fine") return makeCamelliaStudy(rows, cols);
-  if (["puppy","space-cat","cloud-bear","rainbow-balloons"].includes(motif)) return makePlayfulPattern(motif as PlayfulMotif, rows, cols);
+  if (ART_MOTIFS.includes(motif as ArtMotif)) return makeArtPattern(motif as ArtMotif, rows, cols);
+  if (motif === "koi") return makeKoiStudy(rows, cols);
+  if (motif === "peacock") return makePeacockStudy(rows, cols);
+  if (motif === "deco-fan") return makeDecoFanStudy(rows, cols);
+  if (motif === "fern") return makeFernStudy(rows, cols);
+  if (motif === "zellige") return makeZelligeStudy(rows, cols);
+  if (motif === "lunar") return makeLunarStudy(rows, cols);
   const repeat=cols%28===0?28:24;
   return Array.from({length:rows*cols},(_,index)=>{
     const r=Math.floor(index/cols),c=index%cols;

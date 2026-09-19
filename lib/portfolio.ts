@@ -1,8 +1,9 @@
 import { createDesign, materialCounts, type Design, type Preset, type Finish } from "./design";
 import { makeOriginalPattern, type OriginalMotif } from "./original-patterns";
 import { ORIGINAL_WORKS } from "./original-collection";
+import { ART_WORKS } from "./art-collection";
 
-export const PORTFOLIO_CATEGORIES = ["All designs", "Geometric", "Botanical", "Whimsical", "Minimal"] as const;
+export const PORTFOLIO_CATEGORIES = ["All designs", "Painterly", "Geometric", "Botanical", "Whimsical", "Minimal"] as const;
 export type PortfolioCategory = Exclude<typeof PORTFOLIO_CATEGORIES[number], "All designs">;
 export type PublicWork = {
   slug: string; title: string; category: PortfolioCategory; description: string;
@@ -14,6 +15,7 @@ export type PublicWork = {
 
 // Intentionally published studio studies. Private and device-local work is never queried here.
 export const PUBLIC_WORKS: readonly PublicWork[] = [
+  ...ART_WORKS,
   ...ORIGINAL_WORKS,
   { slug: "tidal-rhythm", title: "Tidal Rhythm", category: "Geometric", preset: "coast", rows: 22, cols: 112,
     background: "#dce6e2", accent: "#284e50",
@@ -25,11 +27,6 @@ export const PUBLIC_WORKS: readonly PublicWork[] = [
     description: "Luminous blue diamonds on an ink-dark ground. An even-count peyote pattern with a precise metallic outline.",
     story: "A dark ground turns each diamond into a small pool of light. The repeated motif is easy to follow as a sequence, and its narrow gold lines make small colour changes feel dramatic.",
     colors: [["Ink", "#222839"], ["Sapphire", "#427cae"], ["Slate", "#415c7e"], ["Antique gold", "#bd9653"], ["Ivory", "#eee8d8"], ["Ice", "#c2dded"]] },
-  { slug: "wildflower-study", title: "Wildflower Study", category: "Botanical", preset: "bloom", rows: 22, cols: 112,
-    background: "#eddfdf", accent: "#765154",
-    description: "Small, vivid blossoms arranged on a charcoal band. A floral beadwork pattern for playing with colour.",
-    story: "Petals alternate between rose, lilac, orange, and blue. Keep the centres in a single gold to connect the flowers, or replace every petal with one colour for a more restrained garden.",
-    colors: [["Charcoal", "#292b30"], ["Cornflower", "#729ba5"], ["Slate", "#456074"], ["Pollen", "#d7b367"], ["Ivory", "#efeee1"], ["Mint", "#a4cbbb"], ["Marigold", "#de974c"], ["Lilac", "#aa91be"], ["Rose", "#d196a6"]] },
   { slug: "northern-lights", title: "Northern Lights", category: "Minimal", preset: "aurora", rows: 18, cols: 112,
     background: "#dedfe9", accent: "#55566b",
     description: "Fine bands of colour and scattered light on a dark field. A minimal peyote bracelet with an open, spacious rhythm.",
@@ -40,11 +37,6 @@ export const PUBLIC_WORKS: readonly PublicWork[] = [
     description: "A warm geometric bead pattern in terracotta, clay, and cream, outlined with muted brass.",
     story: "The same diamond rhythm takes on a warmer character in earth tones. Cream opens up the centre of the motif; deeper clay brings the edges forward. This narrower band uses eighteen rows.",
     colors: [["Umber", "#583b31"], ["Terracotta", "#b7654c"], ["Burnt clay", "#824634"], ["Brass", "#b99561"], ["Cream", "#eedfc8"], ["Blush", "#d4a78b"]] },
-  { slug: "ivory-garden", title: "Ivory Garden", category: "Botanical", preset: "bloom", rows: 22, cols: 98,
-    background: "#e3e5d9", accent: "#52634c",
-    description: "Green and blue flowers on a soft ivory ground. A light, botanical colour study for a peyote bracelet.",
-    story: "An ivory background changes the mood of the floral repeat entirely. The green petals feel leaf-like, and the occasional blue flower breaks up the sequence without overpowering it.",
-    colors: [["Ivory", "#edead8"], ["Sage", "#759879"], ["Blue", "#7594a5"], ["Ochre", "#b99a5a"], ["Chalk", "#f6f0e2"], ["Mint", "#a7bba0"], ["Olive", "#8f975b"], ["Periwinkle", "#8695aa"], ["Fern", "#557c69"]] },
   { slug: "silver-hour", title: "Silver Hour", category: "Geometric", preset: "nocturne", rows: 18, cols: 112,
     background: "#e2e4e3", accent: "#505c5e",
     description: "A monochrome diamond bracelet in graphite, silver, and mist. A study in contrast and reflective finishes.",
@@ -58,17 +50,19 @@ export const PUBLIC_WORKS: readonly PublicWork[] = [
 ];
 
 export function publicWork(slug: string) { return PUBLIC_WORKS.find(work => work.slug === slug); }
-export const PATTERN_PREVIEW_VERSION = "3";
+export const PATTERN_PREVIEW_VERSION = "7";
+// Geometry/lighting changes must invalidate even patterns with their own revision.
+export function workPreviewVersion(work: PublicWork) { return `${PATTERN_PREVIEW_VERSION}-${work.previewVersion ?? "1"}`; }
 export function workPreviewUrl(work: PublicWork, palette: ColorwayId = "original") {
   return palette === "original"
-    ? `/patterns/${work.slug}.webp?v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`
-    : `/api/portfolio/${work.slug}/image?palette=${palette}&v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`;
+    ? `/patterns/${work.slug}.webp?v=${workPreviewVersion(work)}`
+    : `/api/portfolio/${work.slug}/image?palette=${palette}&v=${workPreviewVersion(work)}`;
 }
 // Use the unannotated render only where the UI already supplies a paired chart.
 export function braceletPreviewUrl(work: PublicWork, palette: ColorwayId = "original") {
   return palette === "original"
-    ? `/patterns/${work.slug}-bracelet.webp?v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`
-    : `/api/portfolio/${work.slug}/image?palette=${palette}&view=bracelet&v=${work.previewVersion ?? PATTERN_PREVIEW_VERSION}`;
+    ? `/patterns/${work.slug}-bracelet.webp?v=${workPreviewVersion(work)}`
+    : `/api/portfolio/${work.slug}/image?palette=${palette}&view=bracelet&v=${workPreviewVersion(work)}`;
 }
 export const COLORWAYS = [
   { id: "original", name: "Original", colors: [] },

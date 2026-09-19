@@ -8,7 +8,9 @@ try {
   const { PUBLIC_WORKS } = await vite.ssrLoadModule("/lib/portfolio.ts");
   const { patternSvg, braceletSvg } = await vite.ssrLoadModule("/lib/portfolio-image.ts");
   const requestedSlug = process.argv.find(arg => arg.startsWith("--work="))?.slice(7);
-  const works = requestedSlug ? PUBLIC_WORKS.filter(work => work.slug === requestedSlug) : process.argv.includes("--originals") ? PUBLIC_WORKS.filter(work => work.motif) : PUBLIC_WORKS;
+  const works = requestedSlug ? PUBLIC_WORKS.filter(work => work.slug === requestedSlug)
+    : process.argv.includes("--originals") ? PUBLIC_WORKS.filter(work => work.motif)
+    : process.argv.includes("--legacy") ? PUBLIC_WORKS.filter(work => !work.motif) : PUBLIC_WORKS;
   if (!works.length) throw new Error(`Unknown pattern: ${requestedSlug}`);
   await fs.mkdir("public/patterns", { recursive: true });
   for (const work of works) {
@@ -30,7 +32,8 @@ try {
   if (process.argv.includes("--originals")) {
     const cells = works.map((work,i) => {
       const x=(i%4)*300,y=Math.floor(i/4)*350;
-      const chart=patternSvg(work,true).replace(/<svg[^>]*>/,`<svg x="${x+18}" y="${y+38}" width="264" height="280" viewBox="0 0 280 ${(work.rows+.5)*10}">`);
+      const columns=Math.min(Math.max(32,work.rows+4),work.cols);
+      const chart=patternSvg(work,true).replace(/<svg[^>]*>/,`<svg x="${x+18}" y="${y+38}" width="264" height="280" viewBox="0 0 ${columns*10} ${(work.rows+.5)*10}">`);
       return `<text x="${x+18}" y="${y+25}" font-family="Arial" font-size="16" fill="#343d35">${work.title}</text>${chart}`;
     }).join("");
     await sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="${Math.ceil(works.length/4)*350}"><path fill="#faf9f6" d="M0 0H1200V2000H0Z"/>${cells}</svg>`)).png().toFile(".sites-runtime/original-patterns-contact.png");

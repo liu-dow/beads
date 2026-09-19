@@ -5,7 +5,7 @@ export const PATTERN_TOPICS = [
     slug: "geometric", name: "Geometric patterns", title: "Free Geometric Peyote Bracelet Patterns",
     description: "Explore diamond motifs and repeating beadwork patterns. Compare palettes, preview a bracelet, and customize a free peyote chart in your browser.",
     intro: "A repeating shape gives a bracelet its rhythm. These diamond studies use a staggered peyote grid, with outlines and contrasting centres that you can recolour independently.",
-    category: "Geometric", slugs: ["starlit-lace", "tidal-rhythm", "midnight-prism", "terracotta-tide", "silver-hour"],
+    category: "Geometric", slugs: ["azure-rosette", "gilded-palmette", "deco-sunburst", "starlit-lace", "tidal-rhythm", "midnight-prism", "terracotta-tide", "silver-hour"],
     sections: [
       { title: "Choose contrast before colour", body: "A diamond is easier to distinguish when the outline, centre, and background have different lightness. Compare Midnight Prism with Silver Hour: the same motif remains readable in blue and in grey. Try Moonlight in a pattern preview to explore this yourself." },
       { title: "Plan the repeat at the edges", body: "Changing bracelet length can cut through a motif. Open the full chart after resizing and check both ends before exporting. The studio lets you align the existing pattern at the top left or crop and expand from the centre." },
@@ -17,9 +17,9 @@ export const PATTERN_TOPICS = [
     slug: "floral", name: "Floral patterns", title: "Free Floral Peyote Bracelet Patterns",
     description: "Discover flower-inspired bead bracelet patterns. Compare dark and light grounds, try new petal colours, and edit your own floral peyote chart for free.",
     intro: "Layered camellias, pointed tulips and small hanging bells bring different shapes to the peyote grid. Compare the full charts, try your colours, and choose a flower repeat to make your own.",
-    category: "Botanical", slugs: ["camellia-nocturne", "porcelain-tulips", "lily-bells", "strawberry-tea", "cherry-sunday", "wildflower-study", "ivory-garden"],
+    category: "Botanical", slugs: ["sunflower-nocturne", "camellia-nocturne", "porcelain-tulips", "lily-bells", "fern-unfurling"],
     sections: [
-      { title: "Begin with the background", body: "Wildflower Study sets bright petals against charcoal. Ivory Garden starts with a pale ground and uses softer greens and blues. Keeping the flowers unchanged while switching the ground is a useful way to test the overall mood." },
+      { title: "Begin with the background", body: "Sunflower Nocturne pairs warm ochre petals with a deep blue-green ground. Camellia Nocturne uses layered ivory petals against midnight blue. Keeping the flowers unchanged while switching the ground is a useful way to test the overall mood." },
       { title: "Give the flowers a shared centre", body: "The flower centres use one colour throughout these patterns. Keeping that colour consistent helps connect the different petals. In the studio, Replace colour updates every bead of a selected colour at once." },
       { title: "Check your physical palette", body: "A pale petal can disappear against a pale background, especially when both beads have reflective finishes. Compare a small group of your actual beads in daylight before making the band. The preview colours are digital approximations, not manufacturer colour matches." },
     ],

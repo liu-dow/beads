@@ -11,6 +11,7 @@ const { PUBLIC_WORKS, publicWork, workDesign, remixWork, filterWorks, galleryUrl
 const { designSchema } = await vite.ssrLoadModule("/lib/design-schema.ts");
 const { patternSvg, braceletSvg } = await vite.ssrLoadModule("/lib/portfolio-image.ts");
 const { portfolioMetadata, parsePublicOrigin, jsonLd, xmlEscape } = await vite.ssrLoadModule("/lib/portfolio-seo.ts");
+const { FINE_MOTIFS } = await vite.ssrLoadModule("/lib/original-patterns.ts");
 
 test("every public gallery item has a valid, unique, English, editable pattern",()=>{
   assert.equal(new Set(PUBLIC_WORKS.map(work=>work.slug)).size,PUBLIC_WORKS.length);
@@ -33,7 +34,7 @@ test("remixing detaches identity, inventory and references without changing the 
 });
 test("query filters intersect, sort deterministically and preserve shareable search state",()=>{
   assert.equal(filterWorks({category:"Botanical"}).length,PUBLIC_WORKS.filter(work=>work.category==="Botanical").length);
-  assert.ok(filterWorks({category:"Botanical",q:"ivory"}).some(work=>work.slug==="ivory-garden"));
+  assert.ok(filterWorks({category:"Botanical",q:"camellia"}).some(work=>work.slug==="camellia-nocturne"));
   assert.equal(filterWorks({q:"not-present"}).length,0);
   assert.deepEqual(filterWorks({sort:"title"}).map(work=>work.title),PUBLIC_WORKS.map(work=>work.title).sort((a,b)=>a.localeCompare(b,"en")));
   const url=galleryUrl({q:"gold & ivory",category:"Geometric",sort:"colors"});
@@ -113,10 +114,10 @@ test("image routes serve explanatory previews and preserve complete making chart
 });
 
 test("preview URLs invalidate old images and retain palette selections",async()=>{
-  const {workPreviewUrl,PATTERN_PREVIEW_VERSION}=await vite.ssrLoadModule("/lib/portfolio.ts");
+  const {workPreviewUrl,workPreviewVersion}=await vite.ssrLoadModule("/lib/portfolio.ts");
   for(const variant of COLORWAYS){
     const url=new URL(workPreviewUrl(publicWork("tidal-rhythm"),variant.id),"https://test.invalid");
-    assert.equal(url.searchParams.get("v"),PATTERN_PREVIEW_VERSION);
+    assert.equal(url.searchParams.get("v"),workPreviewVersion(publicWork("tidal-rhythm")));
     if(variant.id==="original")assert.equal(url.pathname,"/patterns/tidal-rhythm.webp");
     else {assert.equal(url.pathname,"/api/portfolio/tidal-rhythm/image");assert.equal(url.searchParams.get("palette"),variant.id);}
   }
@@ -127,7 +128,7 @@ test("topic collections link only to existing patterns and social previews have 
   for(const topic of PATTERN_TOPICS){assert.ok(topicWorks(topic).length>=2);assert.equal(topicWorks(topic).length,topic.slugs.length);assert.ok(topic.sections.every(section=>section.body.length>100));}
   for(const work of PUBLIC_WORKS){const png=await readFile(`public/patterns/${work.slug}.png`);assert.equal(png.readUInt32BE(16),1200);assert.equal(png.readUInt32BE(20),960);}
   const {workSocialImage}=await vite.ssrLoadModule("/lib/portfolio-seo.ts");
-  assert.match(workSocialImage("https://beads.example.com","ivory-garden","Ivory Garden").openGraph.images[0].url,/\/patterns\/ivory-garden\.png$/);
+  assert.match(workSocialImage("https://beads.example.com","camellia-nocturne","Camellia Nocturne").openGraph.images[0].url,/\/patterns\/camellia-nocturne\.png$/);
 });
 
 test("public detail content is English and useful before client JavaScript loads",async()=>{
@@ -153,17 +154,17 @@ test("conversion collection rejects foreign or invalid requests and drops privat
   try{assert.equal((await POST(request({event:"design_saved",design:"private-id",title:"Private title",email:"private@example.com"}))).status,204);assert.deepEqual(logged,{type:"bead_conversion",event:"design_saved"});}finally{console.info=original;}
 });
 
-test("the new studio collection contains sixteen distinct original structures and leads the gallery",()=>{
+test("the studio collection holds every distinct original structure and leads the gallery",()=>{
   const originals=PUBLIC_WORKS.filter(work=>work.motif);
-  assert.equal(originals.length,16);
-  assert.equal(PUBLIC_WORKS[0].slug,"camellia-nocturne");
-  assert.equal(new Set(originals.map(work=>JSON.stringify(workDesign(work).cells))).size,16);
-  assert.equal(filterWorks({category:"Whimsical"}).length,10);
+  assert.equal(originals.length,14);
+  assert.equal(PUBLIC_WORKS[0].slug,"starry-current");
+  assert.equal(new Set(originals.map(work=>JSON.stringify(workDesign(work).cells))).size,originals.length);
+  assert.equal(filterWorks({category:"Whimsical"}).length,2);
   for(const work of originals){
     const d=workDesign(work);
     assert.ok(new Set(d.cells).size>=4,work.slug);
     assert.deepEqual(d.cells,workDesign(work).cells,"generation is stable");
-    if(work.motif === "camellia-fine" || ["puppy","space-cat","cloud-bear","rainbow-balloons"].includes(work.motif)) continue;
+    if(FINE_MOTIFS.includes(work.motif)) continue;
     const repeat=d.cols%28===0?28:24;
     for(let r=0;r<d.rows;r++)for(let c=repeat;c<d.cols;c++)assert.equal(d.cells[r*d.cols+c],d.cells[r*d.cols+c%repeat],work.slug+" has complete repeats");
   }
@@ -183,5 +184,5 @@ test("fine camellia is a nine-colour editable study with smaller beads, not an e
   assert.match(html,/digital prototype, not a physically tested pattern/);
   assert.doesNotMatch(html,/1.6 mm cylinder beads/);
   const {workPreviewUrl,braceletPreviewUrl}=await vite.ssrLoadModule("/lib/portfolio.ts");
-  for(const variant of COLORWAYS)for(const url of [workPreviewUrl(work,variant.id),braceletPreviewUrl(work,variant.id)])assert.match(url,/v=4$/);
+  for(const variant of COLORWAYS)for(const url of [workPreviewUrl(work,variant.id),braceletPreviewUrl(work,variant.id)])assert.match(url,/v=7-4$/);
 });
