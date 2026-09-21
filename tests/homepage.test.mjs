@@ -124,7 +124,8 @@ test("first-screen experience explains the product and offers a real editable pr
   assert.match(hero, /Edit this pattern/);
   assert.match(hero, /aria-label="2D pattern preview"/);
   assert.match(hero, /Like this pattern\? Make it yours in the studio\./);
-  assert.match(hero, /aria-pressed="false"[^>]*>Full chart/);
+  assert.match(hero, /Your complete bracelet chart/);
+  assert.doesNotMatch(hero, /Pattern detail/);
   assert.match(hero, /loading="eager"/);
   assert.match(hero, /fetchPriority="high"/);
   assert.match(hero, /No account needed/);

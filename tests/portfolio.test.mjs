@@ -156,7 +156,7 @@ test("conversion collection rejects foreign or invalid requests and drops privat
 
 test("the studio collection holds every distinct original structure and leads the gallery",()=>{
   const originals=PUBLIC_WORKS.filter(work=>work.motif);
-  assert.equal(originals.length,14);
+  assert.equal(originals.length,18);
   assert.equal(PUBLIC_WORKS[0].slug,"starry-current");
   assert.equal(new Set(originals.map(work=>JSON.stringify(workDesign(work).cells))).size,originals.length);
   assert.equal(filterWorks({category:"Whimsical"}).length,2);

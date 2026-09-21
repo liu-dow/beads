@@ -17,7 +17,6 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
 
 export function HomeDesignDemo({ works }: { works: PublicWork[] }) {
   const [slug, setSlug] = useState(works[0].slug), [view, setView] = useState("pattern");
-  const [fullChart, setFullChart] = useState(false);
   const work = works.find(work => work.slug === slug) ?? works[0];
   const design = useMemo(() => workDesign(work), [work]);
   return <div className={styles.demo}>
@@ -25,8 +24,8 @@ export function HomeDesignDemo({ works }: { works: PublicWork[] }) {
     <div className={styles.demoWorkspace}>
       <div className={styles.demoChart} role="region" aria-label="2D pattern preview">
         <div className={styles.demoPaneHeading}><h2>2D pattern</h2><span>{work.rows} rows × {work.cols} columns</span></div>
-        <div className={styles.demoChartStage}><BeadPatternPreview design={design} full={fullChart}/><span>{fullChart ? "Your complete bracelet chart" : `Pattern detail · columns 1–${Math.min(Math.max(32, design.rows + 4), design.cols)}`}</span></div>
-        <div className={styles.demoPaneFooter}><div role="group" aria-label="Chart detail"><button type="button" aria-pressed={!fullChart} onClick={() => setFullChart(false)}>Pattern detail</button><button type="button" aria-pressed={fullChart} onClick={() => setFullChart(true)}>Full chart</button></div><Link href={studioUrl(work)}>Edit in studio <ArrowRight size={13}/></Link></div>
+        <div className={styles.demoChartStage}><BeadPatternPreview design={design} full/><span>Your complete bracelet chart</span></div>
+        <div className={styles.demoPaneFooter}><Link href={studioUrl(work)}>Edit in studio <ArrowRight size={13}/></Link></div>
       </div>
       <span className={styles.demoConnection} aria-hidden="true"><ArrowRight size={19}/></span>
       <Tabs value={view} onValueChange={setView} className={styles.demoTabs}>

@@ -52,6 +52,10 @@ npm run db:migration:new -- migration_name
 npm run db:test
 ```
 
+## 自动部署
+
+推送到 GitHub `main` 分支后，GitHub Actions 会构建、运行测试，并在通过后发布到 Cloudflare Workers。Pull Request 只运行检查，不发布。账户连接和后续绑定域名的步骤见 [部署说明](docs/deployment.md)。
+
 ## 验证与构建
 
 ```sh

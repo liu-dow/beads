@@ -17,7 +17,7 @@ export const PATTERN_TOPICS = [
     slug: "floral", name: "Floral patterns", title: "Free Floral Peyote Bracelet Patterns",
     description: "Discover flower-inspired bead bracelet patterns. Compare dark and light grounds, try new petal colours, and edit your own floral peyote chart for free.",
     intro: "Layered camellias, pointed tulips and small hanging bells bring different shapes to the peyote grid. Compare the full charts, try your colours, and choose a flower repeat to make your own.",
-    category: "Botanical", slugs: ["sunflower-nocturne", "camellia-nocturne", "porcelain-tulips", "lily-bells", "fern-unfurling"],
+    category: "Botanical", slugs: ["sunflower-nocturne", "violet-irises", "blossom-bough", "camellia-nocturne", "porcelain-tulips", "lily-bells", "fern-unfurling"],
     sections: [
       { title: "Begin with the background", body: "Sunflower Nocturne pairs warm ochre petals with a deep blue-green ground. Camellia Nocturne uses layered ivory petals against midnight blue. Keeping the flowers unchanged while switching the ground is a useful way to test the overall mood." },
       { title: "Give the flowers a shared centre", body: "The flower centres use one colour throughout these patterns. Keeping that colour consistent helps connect the different petals. In the studio, Replace colour updates every bead of a selected colour at once." },

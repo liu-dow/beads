@@ -9,9 +9,12 @@
     "install:ci": "bash scripts/install-ci.sh",
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
     "build": "bash scripts/build-verified.sh",
+    "build:cloudflare": "vinext build",
+    "deploy:cloudflare": "wrangler deploy --keep-vars",
     "generate:previews": "node scripts/generate-pattern-previews.mjs",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "test": "npm run build && node --test tests/*.test.mjs",
+    "test:ci": "node --test tests/*.test.mjs",
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:migration:new": "supabase migration new",
     "db:test": "node --test tests/account-rls.test.mjs"
